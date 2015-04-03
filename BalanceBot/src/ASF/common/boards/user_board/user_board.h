@@ -56,4 +56,6 @@
 
 #define put_debug_char(ch)	usart_serial_putchar(DBG_USART,ch)
 
+#include "L298N.h"
+
 #endif // USER_BOARD_H

@@ -18,4 +18,27 @@ void board_init(void)
 	 * for, e.g., the I/O pins. The initialization can rely on application-
 	 * specific board configuration, found in conf_board.h.
 	 */
+	ioport_init();	//This must be called before any other ioport function.
+	ioport_set_pin_dir(BLINK_LED, IOPORT_DIR_OUTPUT);	//make LED pin an output
+	
+	#if 0
+	init_dbg_rs232(sysclk_get_peripheral_bus_hz(DBG_USART));
+	#else
+	static const gpio_map_t DBG_USART_GPIO_MAP =
+	{
+		{DBG_USART_RX_PIN, DBG_USART_RX_FUNCTION},
+		{DBG_USART_TX_PIN, DBG_USART_TX_FUNCTION}
+	};
+
+	gpio_enable_module(DBG_USART_GPIO_MAP,
+	sizeof(DBG_USART_GPIO_MAP) / sizeof(DBG_USART_GPIO_MAP[0]));
+
+	usart_serial_options_t usart_opt = {
+		.baudrate = DBG_USART_BAUDRATE,
+		.charlength = 8,
+		.paritytype = USART_NO_PARITY,
+		.stopbits = 1
+	};
+	usart_serial_init(DBG_USART, &usart_opt);
+	#endif
 }

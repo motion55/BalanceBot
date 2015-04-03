@@ -52,8 +52,8 @@ void L298N_init(void)
 	pwm_channel.CMR.calg  = PWM_MODE_CENTER_ALIGNED;		// Channel mode.
 	pwm_channel.CMR.cpol  = PWM_POLARITY_LOW;				// Channel polarity.
 	pwm_channel.CMR.cpre  = AVR32_PWM_CPRE_CCK;				// Channel prescaler.
-	pwm_channel.cdty      = 10;       // Channel duty cycle, should be < CPRD.
-	pwm_channel.cprd      = 20;       // Channel period.
+	pwm_channel.cdty      = 600;       // Channel duty cycle, should be < CPRD.
+	pwm_channel.cprd      = 1200;       // Channel period.
 
 	// With these settings, the output waveform period will be :
 	// (56MHz)/20 == 2.8MHz == (MCK/prescaler)/period, with MCK == 56MHz,

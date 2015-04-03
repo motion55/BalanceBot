@@ -29,12 +29,39 @@
  * Support and FAQ: visit <a href="http://www.atmel.com/design-support/">Atmel Support</a>
  */
 #include <asf.h>
+#include "Timer.h"
+#include "debug_console.h"
 
 int main (void)
 {
 	/* Insert system clock initialization code here (sysclk_init()). */
+	sysclk_init();
 
 	board_init();
+	
+	/* Initialize interrupts */
+	irq_initialize_vectors();
+	cpu_irq_enable();
 
 	/* Insert application code here, after the board has been initialized. */
+	SetupTimer();
+	
+	InitTimer();
+	
+	DebugInit();
+
+	L298N_init();
+
+	StartTimer(BLINK_TIMER, 500);
+	
+	while (true) {
+		DebugTask();
+
+		if (TimerOut(BLINK_TIMER))
+		{
+			ResetTimer(BLINK_TIMER);
+			StartTimer(BLINK_TIMER, 500);
+			ioport_toggle_pin_level(BLINK_LED);
+		}
+	}
 }

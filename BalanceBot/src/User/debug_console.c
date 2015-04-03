@@ -484,12 +484,6 @@ void debug_idle(void)
 {
 	if (bTest)
 	{
-		if (TimerOut(BLINK_TIMER))
-		{
-			ResetTimer(BLINK_TIMER);
-			StartTimer(BLINK_TIMER, 500);
-			ioport_toggle_pin_level(BLINK_LED);
-		}
 	}
 }
 
