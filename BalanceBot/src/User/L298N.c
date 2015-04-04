@@ -18,7 +18,10 @@ void L298N_init(void)
 										{0}, // ccnt
 										{0}, // dt
 										{0}};// dtupd  ;  One channel config.
-	unsigned int channel_id;
+//	unsigned int channel_id;
+	
+	gpio_enable_module_pin(L298N_ENA_PIN, L298N_ENA_FUNC);
+	gpio_enable_module_pin(L298N_ENB_PIN, L298N_ENB_FUNC);
 	
 	gpio_enable_module_pin(L298N_INP1_PIN, L298N_INP1_FUNC);
 	gpio_enable_module_pin(L298N_INP2_PIN, L298N_INP2_FUNC);
@@ -35,9 +38,9 @@ void L298N_init(void)
 	pwm_opt.sync_update_channel_mode  = PWM_SYNC_UPDATE_MANUAL_WRITE_MANUAL_UPDATE;
 	pwm_opt.sync_channel_select[0]    = true;
 	pwm_opt.sync_channel_select[1]    = true;
-	pwm_opt.sync_channel_select[2]    = false;
+	pwm_opt.sync_channel_select[2]    = true;
 	pwm_opt.sync_channel_select[3]    = false;
-	pwm_opt.cksel                     = PWM_CKSEL_GCLK;
+	pwm_opt.cksel                     = PWM_CKSEL_MCK;
 	
 	pwm_init(&pwm_opt);
 
@@ -47,7 +50,7 @@ void L298N_init(void)
 	// Channel configuration
 	pwm_channel.CMR.dte   = 1;        // Enable Deadtime for complementary Mode
 	pwm_channel.CMR.dthi  = 1;        // Deadtime Inverted on PWMH
-	pwm_channel.CMR.dtli  = 0;        // Deadtime Not Inverted on PWML
+	pwm_channel.CMR.dtli  = 1;        // Deadtime Not Inverted on PWML
 	pwm_channel.CMR.ces   = 0;        // 0/1 Channel Event at the End of PWM Period
 	pwm_channel.CMR.calg  = PWM_MODE_CENTER_ALIGNED;		// Channel mode.
 	pwm_channel.CMR.cpol  = PWM_POLARITY_LOW;				// Channel polarity.
@@ -59,6 +62,8 @@ void L298N_init(void)
 	// (56MHz)/20 == 2.8MHz == (MCK/prescaler)/period, with MCK == 56MHz,
 	// prescaler == 1, period == 20.
 
-	pwm_channel_init(channel_id, &pwm_channel); // Set channel configuration to channel 0
-	pwm_start_channels((1 << channel_id));  // Start channel 0 & 1.
+	pwm_channel_init(0, &pwm_channel); // Set channel configuration to channel 0
+	pwm_channel_init(1, &pwm_channel); // Set channel configuration to channel 0
+	pwm_channel_init(2, &pwm_channel); // Set channel configuration to channel 0
+	pwm_start_channels((1 << 0)|(1 << 1)|(1 << 2));  // Start channel 0, 1, 2.
 }
