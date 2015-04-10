@@ -41,4 +41,13 @@ void board_init(void)
 	};
 	usart_serial_init(DBG_USART, &usart_opt);
 	#endif
+
+	static const gpio_map_t TWI_GPIO_MAP =
+		{
+			{TWI_SDA_PIN, TWI_SDA_FUNCTION},
+			{TWI_SCL_PIN, TWI_SCL_FUNCTION}
+		};
+
+	// TWI gpio pins configuration
+	gpio_enable_module(TWI_GPIO_MAP, sizeof(TWI_GPIO_MAP) / sizeof(TWI_GPIO_MAP[0]));
 }

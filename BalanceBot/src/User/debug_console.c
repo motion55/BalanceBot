@@ -66,6 +66,11 @@ Bool bTest = FALSE;
 char tx_buffer[BUFFER_SIZE];
 unsigned short tx_head, tx_tail;
 
+void debug_idle(void);
+void debug_parse(char *cmd_line);
+void debug_rcv(char ch);
+unsigned int do_dump(void);
+
 void DebugPutChar(char ch);
 void DebugSend(char *message);
 
@@ -302,6 +307,12 @@ void debug_parse(char *cmd_line)
 		}
 		break;
 	case 'U':
+		if (sscanf(cmd_line,"%d %d",&temp1,&temp2)==2)
+		{
+			DebugPrint("\r\n L298_set_speed(%d,%d)", temp1, temp2);
+			L298_set_speed(temp1,temp2);
+		}
+		else
 		if (sscanf(cmd_line,"%X",&temp1)==1)
 		{
 			switch (temp1){

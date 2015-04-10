@@ -43,11 +43,17 @@
 #define	L298N_INP4_PIN	AVR32_PWM_PWMH_2_1_PIN 	//AVR32_PIN_PC20
 #define	L298N_INP4_FUNC	AVR32_PWM_PWMH_2_1_FUNCTION
 
+#if defined(L298N_ENA_FUNC)
+#define L298N_CHANA	1
+#else
 #define L298N_CHANA	0
+#endif
 #define L298N_CHANB	2
 
 #endif
 
-void L298N_init(void);
+extern void L298N_init(void);
+
+extern int L298_set_speed(int Chan_A_Speed, int Chan_B_Speed);
 
 #endif /* L298N_H_ */

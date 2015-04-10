@@ -51,10 +51,13 @@
 #define DBG_USART_BAUDRATE      57600
 
 #define debug_char_rdy()	usart_test_hit(DBG_USART)
-
 #define get_debug_char()	usart_getchar(DBG_USART)
-
 #define put_debug_char(ch)	usart_serial_putchar(DBG_USART,ch)
+
+#define TWI_SDA_PIN			AVR32_TWIMS0_TWD_PIN
+#define TWI_SDA_FUNCTION	AVR32_TWIMS0_TWD_FUNCTION
+#define TWI_SCL_PIN 		AVR32_TWIMS0_TWCK_PIN
+#define TWI_SCL_FUNCTION	AVR32_TWIMS0_TWCK_FUNCTION
 
 #include "L298N.h"
 
