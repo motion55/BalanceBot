@@ -36,5 +36,16 @@
 // External oscillator startup time
 //#define BOARD_XOSC_STARTUP_US  500000
 
+#define BOARD_OSC0_HZ          12000000
+#define BOARD_OSC0_STARTUP_US  17000
+#define BOARD_OSC0_IS_XTAL     true
+
+#define TWI_SDA_PIN			AVR32_TWIMS0_TWD_PIN
+#define TWI_SDA_FUNCTION	AVR32_TWIMS0_TWD_FUNCTION
+#define TWI_SCL_PIN 		AVR32_TWIMS0_TWCK_PIN
+#define TWI_SCL_FUNCTION	AVR32_TWIMS0_TWCK_FUNCTION
+
+#define TWI_SPEED             50000   		// Speed of TWI
+#define MPU6050_ADDRESS       0b1110100		// MPU6050's TWI 7-bit address
 
 #endif // USER_BOARD_H

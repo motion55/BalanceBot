@@ -8,9 +8,10 @@
 #include <asf.h>
 //#include <avr32/io.h>
 
-int function(void)
+int MPU6050_Init(void)
 {
     //TODO:: Please write your application code
+	board_init();
 
     return 0;
 }

@@ -18,4 +18,11 @@ void board_init(void)
 	 * for, e.g., the I/O pins. The initialization can rely on application-
 	 * specific board configuration, found in conf_board.h.
 	 */
+	twi_master_options_t opt;
+	
+	opt.speed = TWI_SPEED;
+	opt.chip = MPU6050_ADDRESS;
+	
+	int status = twi_master_setup(&AVR32_TWIM0, &opt);
 }
+

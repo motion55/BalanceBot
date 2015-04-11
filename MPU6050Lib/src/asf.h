@@ -59,13 +59,32 @@
 #include <compiler.h>
 #include <status_codes.h>
 
+// From module: FLASHC - Flash Controller
+#include <flashc.h>
+
 // From module: Generic board support
 #include <board.h>
+
+// From module: INTC - Interrupt Controller
+#include <intc.h>
 
 // From module: Interrupt management - UC3 implementation
 #include <interrupt.h>
 
 // From module: Part identification macros
 #include <parts.h>
+
+// From module: System Clock Control - UC3 C implementation
+#include <sysclk.h>
+
+// From module: TWI - Two-Wire Interface - UC3 A3/A4/C/D/L implementation
+#include <twi_master.h>
+#include <uc3_twim/twi_master.h>
+
+// From module: TWI - Two-Wire Master Interface
+#include <twim.h>
+
+// From module: TWI - Two-Wire Slave Interface
+#include <twis.h>
 
 #endif // ASF_H
