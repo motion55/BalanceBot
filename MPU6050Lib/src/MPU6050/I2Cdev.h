@@ -65,7 +65,8 @@ THE SOFTWARE.
                                       // ^^^ NBWire implementation is still buggy w/some interrupts!
 #define I2CDEV_BUILTIN_FASTWIRE     3 // FastWire object from Francesco Ferrara's project
 #define I2CDEV_I2CMASTER_LIBRARY    4 // I2C object from DSSCircuits I2C-Master Library at https://github.com/DSSCircuits/I2C-Master-Library
-#define I2CDEV_AVR32_TWI			5	
+#define I2CDEV_MSP430				5
+#define I2CDEV_AVR32_TWI			6	
 
 // -----------------------------------------------------------------------------
 // Arduino-style "Serial.print" debug constant (uncomment to enable)
@@ -75,6 +76,18 @@ THE SOFTWARE.
 
 // 1000ms default read timeout (modify with "I2Cdev::readTimeout = [ms];")
 #define I2CDEV_DEFAULT_READ_TIMEOUT     1000
+
+#if I2CDEV_IMPLEMENTATION == I2CDEV_AVR32_TWI
+	#ifdef __cplusplus
+	extern "C" {
+	#endif
+	//	#include "asf.h"
+	#include <compiler.h>
+	//	#include <status_codes.h>
+	#ifdef __cplusplus
+	}
+	#endif
+#endif
 
 class I2Cdev {
     public:
@@ -101,15 +114,6 @@ class I2Cdev {
         static uint16_t readTimeout;
 };
 
-#if I2CDEV_IMPLEMENTATION == I2CDEV_AVR32_TWI
-#ifdef __cplusplus
-	extern "C" {
-#endif
-	#include "asf.h"
-#ifdef __cplusplus
-	}
-#endif
-#endif
 
 #if I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
     //////////////////////

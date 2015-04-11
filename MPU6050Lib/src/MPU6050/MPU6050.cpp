@@ -3039,7 +3039,7 @@ void MPU6050::readMemoryBlock(uint8_t *data, uint16_t dataSize, uint8_t bank, ui
         }
     }
 }
-#if !(I2CDEV_IMPLEMENTATION == I2CDEV_MSP430)
+#if (I2CDEV_IMPLEMENTATION < I2CDEV_MSP430)
 bool MPU6050::writeMemoryBlock(const uint8_t *data, uint16_t dataSize, uint8_t bank, uint8_t address, bool verify, bool useProgMem) {
     setMemoryBank(bank);
     setMemoryStartAddress(address);

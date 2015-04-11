@@ -217,10 +217,11 @@ int8_t I2Cdev::readBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8
     #endif
 
     int8_t count = 0;
+#if (I2CDEV_IMPLEMENTATION == I2CDEV_AVR32_TWI)
+#else
     uint32_t t1 = millis();
 
-	#if (I2CDEV_IMPLEMENTATION == I2CDEV_AVR32_TWI)
-    #elif (I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE)
+    #if (I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE)
 
         #if (ARDUINO < 100)
             // Arduino v00xx (before v1.0), Wire library
@@ -308,6 +309,7 @@ int8_t I2Cdev::readBytes(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint8
 
     // check for timeout
     if (timeout > 0 && millis() - t1 >= timeout && count < length) count = -1; // timeout
+#endif
 
     #ifdef I2CDEV_SERIAL_DEBUG
         Serial.print(". Done (");
@@ -338,10 +340,12 @@ int8_t I2Cdev::readWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint1
     #endif
 
     int8_t count = 0;
-    uint32_t t1 = millis();
-
+	
 	#if (I2CDEV_IMPLEMENTATION == I2CDEV_AVR32_TWI)
-    #elif (I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE)
+	#else
+    uint32_t t1 = millis();
+	
+    #if (I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE)
 
         #if (ARDUINO < 100)
             // Arduino v00xx (before v1.0), Wire library
@@ -461,6 +465,7 @@ int8_t I2Cdev::readWords(uint8_t devAddr, uint8_t regAddr, uint8_t length, uint1
     #endif
 
     if (timeout > 0 && millis() - t1 >= timeout && count < length) count = -1; // timeout
+    #endif
 
     #ifdef I2CDEV_SERIAL_DEBUG
         Serial.print(". Done (");
