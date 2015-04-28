@@ -31,7 +31,7 @@
 #include <asf.h>
 #include "Timer.h"
 #include "debug_console.h"
-#include "MPU6050Lib.h"
+#include "MPU6050.h"
 
 int main (void)
 {
@@ -53,8 +53,6 @@ int main (void)
 
 	L298N_init();
 	
-//	MPU6050_Init();
-
 	StartTimer(BLINK_TIMER, 500);
 	
 	while (true) {

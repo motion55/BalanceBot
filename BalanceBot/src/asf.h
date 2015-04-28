@@ -62,6 +62,9 @@
 #include <compiler.h>
 #include <status_codes.h>
 
+// From module: Delay routines
+#include <delay.h>
+
 // From module: FLASHC - Flash Controller
 #include <flashc.h>
 

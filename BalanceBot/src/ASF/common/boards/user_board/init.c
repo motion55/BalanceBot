@@ -44,8 +44,8 @@ void board_init(void)
 
 	static const gpio_map_t TWI_GPIO_MAP =
 		{
-			{TWI_SDA_PIN, TWI_SDA_FUNCTION},
-			{TWI_SCL_PIN, TWI_SCL_FUNCTION}
+			{MPU6050_TWIM_SDA_PIN, MPU6050_TWIM_SDA_FUNCTION},
+			{MPU6050_TWIM_SCL_PIN, MPU6050_TWIM_SCL_FUNCTION}
 		};
 
 	// TWI gpio pins configuration

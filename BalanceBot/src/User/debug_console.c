@@ -118,7 +118,7 @@ unsigned int do_dump(void)
 
 void debug_parse(char *cmd_line)
 {
-	int params;
+	int params, result;
 	unsigned int temp1,temp2,temp3,temp4;
 	unsigned short tempword;
 	unsigned char tempbyte;
@@ -281,6 +281,17 @@ void debug_parse(char *cmd_line)
 		{
 			switch (temp1){
 			case 0:
+				#ifdef	_MPU6050LIB_H_			
+				result = MPU6050_Setup();
+				if (result==STATUS_OK)
+				{
+					DebugPrint("\r\n MPU6050 Init Success!");
+				}
+				else
+				{
+					DebugPrint("\r\n MPU6050 Init Fail. Error = %i", result);
+				}
+				#endif
 				break;
 			case 1:
 				break;

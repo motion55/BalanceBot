@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Atmel Studio Solution File, Format Version 11.00
 Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "BalanceBot", "BalanceBot\BalanceBot.cproj", "{3521E852-6003-4F26-800A-6D3E89A9ED17}"
 EndProject
-Project("{E66E83B9-2572-4076-B26E-6BE79FF3018A}") = "MPU6050Lib", "MPU6050Lib\MPU6050Lib.cppproj", "{CA409B24-670E-4B1C-9E55-C6AA0DDCCD3F}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|AVR = Debug|AVR
@@ -15,10 +13,6 @@ Global
 		{3521E852-6003-4F26-800A-6D3E89A9ED17}.Debug|AVR.Build.0 = Debug|AVR
 		{3521E852-6003-4F26-800A-6D3E89A9ED17}.Release|AVR.ActiveCfg = Release|AVR
 		{3521E852-6003-4F26-800A-6D3E89A9ED17}.Release|AVR.Build.0 = Release|AVR
-		{CA409B24-670E-4B1C-9E55-C6AA0DDCCD3F}.Debug|AVR.ActiveCfg = Debug|AVR
-		{CA409B24-670E-4B1C-9E55-C6AA0DDCCD3F}.Debug|AVR.Build.0 = Debug|AVR
-		{CA409B24-670E-4B1C-9E55-C6AA0DDCCD3F}.Release|AVR.ActiveCfg = Release|AVR
-		{CA409B24-670E-4B1C-9E55-C6AA0DDCCD3F}.Release|AVR.Build.0 = Release|AVR
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
