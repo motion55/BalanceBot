@@ -15,6 +15,11 @@
 #include "inv_mpu_dmp_motion_driver.h"
 #include "MPU6050.h"
 
+#if 0
+#define TRACE  	DebugPrint
+#else
+#define TRACE	
+#endif
 
 // MPU control/status vars
 uint8_t devStatus;      // return status after each device operation
@@ -57,77 +62,81 @@ int MPU6050_Setup(void)
 		return -1;
 
 	// initialize device
-	DebugPrint("Initializing MPU...\n");
-	if (mpu_init(NULL) != 0) {
-		DebugPrint("MPU init failed!\n");
+	TRACE("Initializing MPU...\r\n");
+	result = mpu_init(NULL);
+	if (result != 0) 
+	{
+		TRACE("MPU init failed! result = %i \r\n", result);
 		return -1;
 	}
-	DebugPrint("Setting MPU sensors...\n");
+	
+	TRACE("Setting MPU sensors...\r\n");
 	if (mpu_set_sensors(INV_XYZ_GYRO|INV_XYZ_ACCEL)!=0) {
-		DebugPrint("Failed to set sensors!\n");
+		TRACE("Failed to set sensors!\r\n");
 		return -1;
 	}
-	DebugPrint("Setting GYRO sensitivity...\n");
+	
+	TRACE("Setting GYRO sensitivity...\r\n");
 	if (mpu_set_gyro_fsr(2000)!=0) {
-		DebugPrint("Failed to set gyro sensitivity!\n");
+		TRACE("Failed to set gyro sensitivity!\r\n");
 		return -1;
 	}
-	DebugPrint("Setting ACCEL sensitivity...\n");
+	TRACE("Setting ACCEL sensitivity...\r\n");
 	if (mpu_set_accel_fsr(2)!=0) {
-		DebugPrint("Failed to set accel sensitivity!\n");
+		TRACE("Failed to set accel sensitivity!\r\n");
 		return -1;
 	}
 	// verify connection
-	DebugPrint("Powering up MPU...\n");
+	TRACE("Powering up MPU...\r\n");
 	mpu_get_power_state(&devStatus);
-	DebugPrint(devStatus ? "MPU6050 connection successful\n" : "MPU6050 connection failed %u\n",devStatus);
+	TRACE(devStatus ? "MPU6050 connection successful\r\n" : "MPU6050 connection failed %u\r\n",devStatus);
 
 	//fifo config
-	DebugPrint("Setting MPU fifo...\n");
+	TRACE("Setting MPU fifo...\r\n");
 	if (mpu_configure_fifo(INV_XYZ_GYRO|INV_XYZ_ACCEL)!=0) {
-		DebugPrint("Failed to initialize MPU fifo!\n");
+		TRACE("Failed to initialize MPU fifo!\r\n");
 		return -1;
 	}
 
 	// load and configure the DMP
-	DebugPrint("Loading DMP firmware...\n");
+	TRACE("Loading DMP firmware...\r\n");
 	if (dmp_load_motion_driver_firmware()!=0) {
-		DebugPrint("Failed to enable DMP!\n");
+		TRACE("Failed to enable DMP!\r\n");
 		return -1;
 	}
 
-	DebugPrint("Activating DMP...\n");
+	TRACE("Activating DMP...\r\n");
 	if (mpu_set_dmp_state(1)!=0) {
-		DebugPrint("Failed to enable DMP!\n");
+		TRACE("Failed to enable DMP!\r\n");
 		return -1;
 	}
 
 	//dmp_set_orientation()
 	//if (dmp_enable_feature(DMP_FEATURE_LP_QUAT|DMP_FEATURE_SEND_RAW_GYRO)!=0) {
-	DebugPrint("Configuring DMP...\n");
+	TRACE("Configuring DMP...\r\n");
 	if (dmp_enable_feature(DMP_FEATURE_6X_LP_QUAT|DMP_FEATURE_SEND_RAW_ACCEL|DMP_FEATURE_SEND_CAL_GYRO|DMP_FEATURE_GYRO_CAL)!=0) {
-		DebugPrint("Failed to enable DMP features!\n");
+		TRACE("Failed to enable DMP features!\r\n");
 		return -1;
 	}
 
-	DebugPrint("Setting DMP fifo rate...\n");
+	TRACE("Setting DMP fifo rate...\r\n");
 	if (dmp_set_fifo_rate(rate)!=0) {
-		DebugPrint("Failed to set dmp fifo rate!\n");
+		TRACE("Failed to set dmp fifo rate!\r\n");
 		return -1;
 	}
 	
-	DebugPrint("Resetting fifo queue...\n");
+	TRACE("Resetting fifo queue...\r\n");
 	if (mpu_reset_fifo()!=0) {
-		DebugPrint("Failed to reset fifo!\n");
+		TRACE("Failed to reset fifo!\r\n");
 		return -1;
 	}
 
-	DebugPrint("Checking... ");
+	TRACE("Checking... ");
 	do {
-		delay_ms(1000/rate);  //dmp will habve 4 (5-1) packets based on the fifo_rate
+		delay_ms(1000/rate);  //dmp will have 4 (5-1) packets based on the fifo_rate
 		r=dmp_read_fifo(g,a,_q,&sensors,&fifoCount);
 	} while (r!=0 || fifoCount<5); //packets!!!
-	DebugPrint("Done.\n");
+	TRACE("Done.\r\n");
 
 	initialized = 1;
 	

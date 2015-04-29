@@ -51,13 +51,15 @@ int main (void)
 	
 	DebugInit();
 
+//	MPU6050_Setup();
+	
 	L298N_init();
 	
 	StartTimer(BLINK_TIMER, 500);
 	
 	while (true) {
 		DebugTask();
-
+		
 		if (TimerOut(BLINK_TIMER))
 		{
 			ResetTimer(BLINK_TIMER);

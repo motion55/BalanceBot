@@ -21,6 +21,7 @@
 #include "string.h"
 #include "debug_console.h"
 #include "Timer.h"
+#include "MPU6050.h"
 
 #ifndef EOF
 #define EOF (-1)            /* End of file indicator */
@@ -281,7 +282,7 @@ void debug_parse(char *cmd_line)
 		{
 			switch (temp1){
 			case 0:
-				#ifdef	_MPU6050LIB_H_			
+				#ifdef	_MPU6050_H_			
 				result = MPU6050_Setup();
 				if (result==STATUS_OK)
 				{

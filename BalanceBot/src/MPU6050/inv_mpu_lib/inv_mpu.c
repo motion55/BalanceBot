@@ -39,7 +39,7 @@
  * min(int a, int b)
  */
 #define min(a,b) ((a)<(b)?(a):(b))
-#define i2c_write   writeBytes
+#define i2c_write(a,b,c,d)   (writeBytes(a,b,c,d)==0?1:0)
 #define i2c_read(a,b,c,d)    (readBytes(a,b,c,d)!=-1?0:1)
 //#define delay_ms(a) 	usleep(a*1000)
 #define printf_P(a) 	DebugPrint(a)
