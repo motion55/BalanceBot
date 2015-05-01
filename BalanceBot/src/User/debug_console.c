@@ -507,6 +507,7 @@ void debug_idle(void)
 {
 	if (bTest)
 	{
+		MPU6050_Loop();
 	}
 }
 
@@ -517,11 +518,7 @@ void DebugTask(void)
 	else
 		debug_idle();
 
-	if (tx_tail!=tx_head)
-	{
-		if (put_debug_char(tx_buffer[tx_tail]))
-			tx_tail = (tx_tail+1)&(BUFFER_SIZE-1);
-	}
+	DoSerial();
 }
 
 void DebugPutChar(char ch)
@@ -553,3 +550,13 @@ void DebugPrint(const char *format, ...)
     va_end(argptr);
 	DebugSend(debug_result);
 }
+
+inline void DoSerial(void)
+{
+	if (tx_tail!=tx_head)
+	{
+		if (put_debug_char(tx_buffer[tx_tail]))
+		tx_tail = (tx_tail+1)&(BUFFER_SIZE-1);
+	}
+}
+

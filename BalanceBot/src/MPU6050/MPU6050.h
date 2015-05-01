@@ -1,5 +1,5 @@
 /*
- * MPU6050Lib.h
+ * MPU6050.h
  *
  * Created: 4/11/2015 5:53:43 PM
  *  Author: Butch

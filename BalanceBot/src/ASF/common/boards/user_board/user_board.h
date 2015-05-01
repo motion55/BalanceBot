@@ -64,5 +64,6 @@
 #define MPU6050_ADDRESS       0x68  		// MPU6050's TWI 7-bit address
 
 #include "L298N.h"
+#include "MPU6050.h"
 
 #endif // USER_BOARD_H

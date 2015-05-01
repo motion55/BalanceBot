@@ -31,7 +31,6 @@
 #include <asf.h>
 #include "Timer.h"
 #include "debug_console.h"
-#include "MPU6050.h"
 
 int main (void)
 {
@@ -49,17 +48,23 @@ int main (void)
 	
 	InitTimer();
 	
+#ifdef	_USE_DEBUG_CONSOLE_
 	DebugInit();
-
-//	MPU6050_Setup();
+#elif defined _MPU6050_H_	
+	MPU6050_Setup();
+#endif
 	
 	L298N_init();
 	
 	StartTimer(BLINK_TIMER, 500);
 	
 	while (true) {
+#ifdef	_USE_DEBUG_CONSOLE_
 		DebugTask();
-		
+#elif defined _MPU6050_H_
+		MPU6050_Loop();
+		DoSerial();
+#endif		
 		if (TimerOut(BLINK_TIMER))
 		{
 			ResetTimer(BLINK_TIMER);

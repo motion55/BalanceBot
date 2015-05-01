@@ -21,6 +21,10 @@ void DebugTask(void);
 
 void DebugPutChar(char ch);
 
+void DebugSend(char *message);
+
 void DebugPrint(const char *format, ...);
+
+void DoSerial(void);
 
 #endif	//#ifndef _DEBUG_CONSOLE_H_
