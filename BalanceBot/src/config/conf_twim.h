@@ -59,17 +59,17 @@
 #	if !defined(AVR32_TWIM0_GROUP)
 #		define AVR32_TWIM0_GROUP         25
 #	else
-#		warning "Duplicate define(s) to remove from the ASF"
+//#		warning "Duplicate define(s) to remove from the ASF"
 #	endif
 #	if !defined(AVR32_TWIM1_GROUP)
 #		define AVR32_TWIM1_GROUP         26
 #	else
-#		warning "Duplicate define(s) to remove from the ASF"
+//#		warning "Duplicate define(s) to remove from the ASF"
 #	endif
 #	if !defined(AVR32_TWIM2_GROUP)
 #		define AVR32_TWIM2_GROUP         45
 #	else
-#		warning "Duplicate define(s) to remove from the ASF"
+//#		warning "Duplicate define(s) to remove from the ASF"
 #	endif
 #	define CONF_TWIM_IRQ_LINE          AVR32_TWIM0_IRQ
 #	define CONF_TWIM_IRQ_GROUP         AVR32_TWIM0_GROUP

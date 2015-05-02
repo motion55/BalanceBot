@@ -10,6 +10,8 @@
 
 typedef enum {MPU6050_OK=0, MPU6050_NOT_DETECTED=100} MPU6050_STATUS_CODE;
 
+extern float ypr[3];
+
 int MPU6050_Setup(void);
 
 void MPU6050_Loop(void);

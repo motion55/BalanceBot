@@ -21,7 +21,7 @@ void board_init(void)
 	ioport_init();	//This must be called before any other ioport function.
 	ioport_set_pin_dir(BLINK_LED, IOPORT_DIR_OUTPUT);	//make LED pin an output
 	
-	#if 0
+	#if 1
 	init_dbg_rs232(sysclk_get_peripheral_bus_hz(DBG_USART));
 	#else
 	static const gpio_map_t DBG_USART_GPIO_MAP =

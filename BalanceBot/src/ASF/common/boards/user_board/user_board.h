@@ -66,4 +66,6 @@
 #include "L298N.h"
 #include "MPU6050.h"
 
+//#define	_USE_DEBUG_CONSOLE_
+
 #endif // USER_BOARD_H

@@ -65,7 +65,7 @@ Bool bTest = FALSE;
 #define	BUFFER_SIZE	1024
 
 char tx_buffer[BUFFER_SIZE];
-unsigned short tx_head, tx_tail;
+unsigned short tx_head=0, tx_tail=0;
 
 void debug_idle(void);
 void debug_parse(char *cmd_line);

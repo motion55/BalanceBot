@@ -6,7 +6,6 @@
  */ 
 
 #include "asf.h"
-#include "debug_console.h"
 
 #include <string.h>
 #include <math.h>
@@ -15,11 +14,7 @@
 #include "inv_mpu_dmp_motion_driver.h"
 #include "MPU6050.h"
 
-#if 1
-#define TRACE  	DebugPrint
-#else
-#define TRACE	DebugSend
-#endif
+#define TRACE	print_dbg
 
 #define YAW 	0
 #define PITCH	1
@@ -144,7 +139,6 @@ int MPU6050_Setup(void)
 	TRACE("Checking... ");
 	int r;
 	do {
-		DoSerial();
 		delay_ms(1000/fifo_rate);  //dmp will have 4 (5-1) packets based on the fifo_rate
 		r=dmp_read_fifo(g,a,_q,&sensors,&fifoCount);
 	} while (r!=0 || fifoCount<5); //packets!!!

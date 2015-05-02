@@ -62,6 +62,7 @@ int main (void)
 #ifdef	_USE_DEBUG_CONSOLE_
 		DebugTask();
 #elif defined _MPU6050_H_
+		DoSerial();
 		MPU6050_Loop();
 		DoSerial();
 #endif		
@@ -70,6 +71,8 @@ int main (void)
 			ResetTimer(BLINK_TIMER);
 			StartTimer(BLINK_TIMER, 500);
 			ioport_toggle_pin_level(BLINK_LED);
+			DebugPrint("\r\n %3.2f %3.2f %3.2f", ypr[0], ypr[1], ypr[2]);
+//			DebugSend("\r\n Toggle");
 		}
 	}
 }
