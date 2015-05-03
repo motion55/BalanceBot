@@ -9,10 +9,28 @@
 
 #include <string.h>
 #include <math.h>
-#include "helper_3dmath.h"
 #include "inv_mpu.h"
 #include "inv_mpu_dmp_motion_driver.h"
 #include "MPU6050.h"
+
+typedef struct {
+	float w;
+	float x;
+	float y;
+	float z;
+} Quaternion;
+
+typedef struct {
+	int16_t x;
+	int16_t y;
+	int16_t z;
+} VectorInt16;
+
+typedef struct {
+	float x;
+	float y;
+	float z;
+} VectorFloat;
 
 #define TRACE	print_dbg
 
@@ -22,6 +40,10 @@
 #define DIM 	3
 
 #define wrap_180(x) (x < -180 ? x+360 : (x > 180 ? x - 360: x))
+
+uint8_t GetGravity(VectorFloat *v, Quaternion *q);
+uint8_t GetYawPitchRoll(float *data, Quaternion *q, VectorFloat *gravity);
+float invSqrt(float x);
 
 // MPU control/status vars
 uint8_t devStatus;      // return status after each device operation
@@ -43,15 +65,12 @@ int16_t sensors;
 
 float ypr[3];
 Quaternion q;
-float temp;
+float temperature;
 float gyro[3];
 float accel[3];
 float compass[3];
 
 uint8_t fifo_rate = 40;
-
-uint8_t GetGravity(VectorFloat *v, Quaternion *q);
-uint8_t GetYawPitchRoll(float *data, Quaternion *q, VectorFloat *gravity);
 
 int MPU6050_Setup(void)
 {
@@ -167,7 +186,7 @@ void MPU6050_Loop(void)
 	GetYawPitchRoll(ypr, &q, &gravity);
 
 	mpu_get_temperature(&t);
-	temp=(float)t/65536L;
+	temperature=(float)t/65536L;
 
 	mpu_get_compass_reg(c);
 
@@ -205,9 +224,22 @@ uint8_t GetYawPitchRoll(float *data, Quaternion *q, VectorFloat *gravity)
 	// yaw: (about Z axis)
 	data[0] = atan2(2*q -> x*q -> y - 2*q -> w*q -> z, 2*q -> w*q -> w + 2*q -> x*q -> x - 1);
 	// pitch: (nose up/down, about Y axis)
-	data[1] = atan(gravity -> x / sqrt(gravity -> y*gravity -> y + gravity -> z*gravity -> z));
+	data[1] = atan(gravity->x * invSqrt(gravity->y*gravity->y + gravity->z*gravity->z));
 	// roll: (tilt left/right, about X axis)
-	data[2] = atan(gravity -> y / sqrt(gravity -> x*gravity -> x + gravity -> z*gravity -> z));
+	data[2] = atan(gravity->y * invSqrt(gravity->x*gravity->x + gravity->z*gravity->z));
 	return 0;
 }
 
+//---------------------------------------------------------------------------------------------------
+// Fast inverse square-root
+// See: http://en.wikipedia.org/wiki/Fast_inverse_square_root
+float invSqrt(float x) 
+{
+	float halfx = 0.5f * x;
+	float y = x;
+	long i = *(long*)&y;
+	i = 0x5f3759df - (i>>1);
+	y = *(float*)&i;
+	y = y * (1.5f - (halfx * y * y));
+	return y;
+}
