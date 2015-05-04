@@ -28,7 +28,7 @@
 /*
  * Support and FAQ: visit <a href="http://www.atmel.com/design-support/">Atmel Support</a>
  */
-#include <asf.h>
+#include "asf.h"
 #include "Timer.h"
 #include "debug_console.h"
 
@@ -49,6 +49,9 @@ int main (void)
 	InitTimer();
 	
 #ifdef	_USE_DEBUG_CONSOLE_
+	#ifdef	_USE_USB_FOR_DEBUG_
+	udc_start();	// Start USB stack
+	#endif
 	DebugInit();
 #elif defined _MPU6050_H_	
 	MPU6050_Setup();
@@ -70,9 +73,10 @@ int main (void)
 		{
 			ResetTimer(BLINK_TIMER);
 			StartTimer(BLINK_TIMER, 500);
-			ioport_toggle_pin_level(BLINK_LED);
+			gpio_tgl_gpio_pin(BLINK_LED);
+#ifdef _MPU6050_H_
 			DebugPrint("\r\n %3.2f %3.2f %3.2f", ypr[0], ypr[1], ypr[2]);
-//			DebugSend("\r\n Toggle");
+#endif			
 		}
 	}
 }

@@ -21,7 +21,6 @@
 #include "string.h"
 #include "debug_console.h"
 #include "Timer.h"
-#include "MPU6050.h"
 
 #ifndef EOF
 #define EOF (-1)            /* End of file indicator */
@@ -507,7 +506,9 @@ void debug_idle(void)
 {
 	if (bTest)
 	{
+	#ifdef	_MPU6050_H_
 		MPU6050_Loop();
+	#endif
 	}
 }
 

@@ -50,9 +50,17 @@
 #define DBG_USART_TX_FUNCTION   AVR32_USART2_TXD_0_1_FUNCTION
 #define DBG_USART_BAUDRATE      57600
 
+//#define _USE_USB_FOR_DEBUG_
+
+#ifdef	_USE_USB_FOR_DEBUG_
+#define debug_char_rdy()	udi_cdc_is_rx_ready()
+#define get_debug_char()	udi_cdc_getc()
+#define put_debug_char(ch)	udi_cdc_putc(ch)
+#else
 #define debug_char_rdy()	usart_test_hit(DBG_USART)
 #define get_debug_char()	usart_getchar(DBG_USART)
 #define put_debug_char(ch)	usart_serial_putchar(DBG_USART,ch)
+#endif	//_USE_USB_FOR_DEBUG_
 
 #define	MPU6050_TWIM             	AVR32_TWIM0
 #define MPU6050_TWIM_SDA_PIN     	AVR32_TWIMS0_TWD_PIN
@@ -63,9 +71,13 @@
 #define MPU6050_TWI_SPEED     400000   		// Speed of TWI
 #define MPU6050_ADDRESS       0x68  		// MPU6050's TWI 7-bit address
 
+#define MPU6050_DMP_INT_PIN 	AVR32_PIN_PC22
+#define MPU6050_DMP_INT_IRQ		(AVR32_GPIO_IRQ_0+(MPU6050_DMP_INT_PIN/8))
+#define MPU6050_DMP_INTC_LEVEL	AVR32_INTC_INT2
+
 #include "L298N.h"
 #include "MPU6050.h"
 
-//#define	_USE_DEBUG_CONSOLE_
+//#define _USE_DEBUG_CONSOLE_
 
 #endif // USER_BOARD_H

@@ -47,6 +47,8 @@ THE SOFTWARE.
 #define I2C_OK 0
 #define I2C_ERR -1
 
+inline static void get_ms(uint32_t *ts) {ts = cpu_cy_2_ms(Get_sys_count(), F_CPU);}
+
 int8_t readBitW(uint8_t devAddr, uint8_t regAddr, uint8_t bitNum, uint16_t *data);
 int8_t readBits(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint8_t *data);
 int8_t readBitsW(uint8_t devAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint16_t *data);

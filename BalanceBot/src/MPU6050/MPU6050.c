@@ -11,7 +11,6 @@
 #include <math.h>
 #include "inv_mpu.h"
 #include "inv_mpu_dmp_motion_driver.h"
-#include "MPU6050.h"
 
 typedef struct {
 	float w;
@@ -59,7 +58,8 @@ int16_t c[3];
 
 VectorFloat gravity;    // [x, y, z]            gravity vector
 
-int dmpReady = 0;
+bool dmpInterrupt = false;
+bool dmpReady = false;
 float lastval[3];
 int16_t sensors;
 
@@ -72,6 +72,15 @@ float compass[3];
 
 uint8_t fifo_rate = 40;
 
+void MPU6050_SetupInterrupt(void);
+
+__attribute__((__interrupt__))
+static void MPU6050_DMP_int_handler(void)
+{
+	gpio_clear_pin_interrupt_flag(MPU6050_DMP_INT_PIN);
+	dmpInterrupt = true;
+}
+
 int MPU6050_Setup(void)
 {
 	twi_master_options_t opt;
@@ -79,7 +88,7 @@ int MPU6050_Setup(void)
 	opt.speed = MPU6050_TWI_SPEED;
 	opt.chip = MPU6050_ADDRESS;
 	
-	dmpReady = 0;
+	dmpReady = false;
 	
 	int result = twi_master_setup(&MPU6050_TWIM, &opt);
 	if (result!=STATUS_OK)
@@ -163,17 +172,35 @@ int MPU6050_Setup(void)
 	} while (r!=0 || fifoCount<5); //packets!!!
 	TRACE("Done.\r\n");
 
-	dmpReady = 1;
+	dmpReady = true;
+	
+	MPU6050_SetupInterrupt();
 	
 	return 0;
 }
 
+void MPU6050_SetupInterrupt(void)
+{
+	TRACE("Setup DMP interrupt.\r\n");
+	dmpInterrupt = false;
+	gpio_configure_pin(MPU6050_DMP_INT_PIN, GPIO_DIR_INPUT|GPIO_PULL_UP);
+	INTC_register_interrupt(&MPU6050_DMP_int_handler, MPU6050_DMP_INT_IRQ, MPU6050_DMP_INTC_LEVEL);
+	gpio_clear_pin_interrupt_flag(MPU6050_DMP_INT_PIN);
+	gpio_enable_pin_interrupt(MPU6050_DMP_INT_PIN, GPIO_FALLING_EDGE);
+	Enable_global_interrupt();
+}
+
 void MPU6050_Loop(void)
 {
-	if (!dmpReady) {
+	if (!dmpReady) 
+	{
 		TRACE("Error: DMP not ready!!\r\n");
-		return -1;
+		return;
 	}
+
+	if (!dmpInterrupt)
+		return;
+	dmpInterrupt = false;
 
 	while (dmp_read_fifo(g,a,_q,&sensors,&fifoCount)!=0); //gyro and accel can be null because of being disabled in the efeatures
 	
@@ -185,11 +212,6 @@ void MPU6050_Loop(void)
 	GetGravity(&gravity, &q);
 	GetYawPitchRoll(ypr, &q, &gravity);
 
-	mpu_get_temperature(&t);
-	temperature=(float)t/65536L;
-
-	mpu_get_compass_reg(c);
-
 	//scaling for degrees output
 	for (int i=0;i<DIM;i++){
 		ypr[i]*=180/M_PI;
@@ -200,6 +222,11 @@ void MPU6050_Loop(void)
 
 	//change sign of Pitch, MPU is attached upside down
 	ypr[1]*=-1.0;
+#if 0
+	mpu_get_temperature(&t,&timestamp);
+	temperature=(float)t/65536L;
+
+	mpu_get_compass_reg(c,&timestamp);
 
 	//0=gyroX, 1=gyroY, 2=gyroZ
 	//swapped to match Yaw,Pitch,Roll
@@ -209,6 +236,7 @@ void MPU6050_Loop(void)
 		accel[i]   = (float)(a[DIM-i-1]);
 		compass[i] = (float)(c[DIM-i-1]);
 	}
+#endif	
 }
 
 uint8_t GetGravity(VectorFloat *v, Quaternion *q) 

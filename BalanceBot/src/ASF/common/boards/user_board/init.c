@@ -18,8 +18,7 @@ void board_init(void)
 	 * for, e.g., the I/O pins. The initialization can rely on application-
 	 * specific board configuration, found in conf_board.h.
 	 */
-	ioport_init();	//This must be called before any other ioport function.
-	ioport_set_pin_dir(BLINK_LED, IOPORT_DIR_OUTPUT);	//make LED pin an output
+	gpio_clr_gpio_pin(BLINK_LED);	//make LED pin an output
 	
 	#if 1
 	init_dbg_rs232(sysclk_get_peripheral_bus_hz(DBG_USART));
