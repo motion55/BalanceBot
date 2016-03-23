@@ -70,7 +70,10 @@ float gyro[3];
 float accel[3];
 float compass[3];
 
-uint8_t fifo_rate = 40;
+uint8_t fifo_rate = 200;
+
+uint32_t timestamp = 0;
+uint32_t deltatime = 0;
 
 void MPU6050_SetupInterrupt(void);
 
@@ -172,9 +175,9 @@ int MPU6050_Setup(void)
 	} while (r!=0 || fifoCount<5); //packets!!!
 	TRACE("Done.\r\n");
 
-	dmpReady = true;
-	
 	MPU6050_SetupInterrupt();
+	
+	dmpReady = true;
 	
 	return 0;
 }
@@ -190,17 +193,19 @@ void MPU6050_SetupInterrupt(void)
 	Enable_global_interrupt();
 }
 
-void MPU6050_Loop(void)
+bool MPU6050_Loop(void)
 {
 	if (!dmpReady) 
 	{
 		TRACE("Error: DMP not ready!!\r\n");
-		return;
+		return false;
 	}
-
+	
 	if (!dmpInterrupt)
-		return;
+		return false;
 	dmpInterrupt = false;
+	
+	timestamp = Get_sys_count();
 
 	while (dmp_read_fifo(g,a,_q,&sensors,&fifoCount)!=0); //gyro and accel can be null because of being disabled in the efeatures
 	
@@ -222,7 +227,7 @@ void MPU6050_Loop(void)
 
 	//change sign of Pitch, MPU is attached upside down
 	ypr[1]*=-1.0;
-#if 0
+	#if 0
 	mpu_get_temperature(&t,&timestamp);
 	temperature=(float)t/65536L;
 
@@ -236,7 +241,11 @@ void MPU6050_Loop(void)
 		accel[i]   = (float)(a[DIM-i-1]);
 		compass[i] = (float)(c[DIM-i-1]);
 	}
-#endif	
+	#endif	
+	
+	deltatime = Get_sys_count()-timestamp;
+	
+	return true;
 }
 
 uint8_t GetGravity(VectorFloat *v, Quaternion *q) 
@@ -261,7 +270,8 @@ uint8_t GetYawPitchRoll(float *data, Quaternion *q, VectorFloat *gravity)
 //---------------------------------------------------------------------------------------------------
 // Fast inverse square-root
 // See: http://en.wikipedia.org/wiki/Fast_inverse_square_root
-float invSqrt(float x) 
+ __attribute__((weak))
+ float invSqrt(float x) 
 {
 	float halfx = 0.5f * x;
 	float y = x;

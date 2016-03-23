@@ -18,6 +18,8 @@
 #define F_PBA sysclk_get_pba_hz()
 #endif
 
+extern uint32_t Time_of_Day;
+
 void SetupTimer(void);
 
 void StartTimer(short int timerno, int delayvalue);
@@ -27,5 +29,7 @@ void ResetTimer(short int timerno);
 char TimerOut(short int timerno);
 
 void InitTimer(void);
+
+void Calc_Time_of_Day(void);
 
 #endif /* TIMER_H_ */

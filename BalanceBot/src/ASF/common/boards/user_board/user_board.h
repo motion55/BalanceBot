@@ -42,6 +42,9 @@
 
 #define BLINK_TIMER     	1
 #define BLINK_LED   		AVR32_PIN_PD30
+#define BALANCE_TIMER		2
+#define BALANCE_TIMER_2		3
+
 
 #define DBG_USART   			(&AVR32_USART2)
 #define DBG_USART_RX_PIN        AVR32_USART2_RXD_0_1_PIN
@@ -75,8 +78,12 @@
 #define MPU6050_DMP_INT_IRQ		(AVR32_GPIO_IRQ_0+(MPU6050_DMP_INT_PIN/8))
 #define MPU6050_DMP_INTC_LEVEL	AVR32_INTC_INT2
 
+//#define MPU9150
+#define MPU6050
+
 #include "L298N.h"
-#include "MPU6050.h"
+//#include "MPU6050.h"
+#include "MadgwickAHRS.h"
 
 //#define _USE_DEBUG_CONSOLE_
 

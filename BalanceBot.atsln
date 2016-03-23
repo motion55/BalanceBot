@@ -1,7 +1,9 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
+Microsoft Visual Studio Solution File, Format Version 12.00
 # Atmel Studio Solution File, Format Version 11.00
-Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "BalanceBot", "BalanceBot\BalanceBot.cproj", "{3521E852-6003-4F26-800A-6D3E89A9ED17}"
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "BalanceBot", "BalanceBot\BalanceBot.cproj", "{89B521F1-410A-4CB7-95CA-6D44E08597E6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,10 +11,10 @@ Global
 		Release|AVR = Release|AVR
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{3521E852-6003-4F26-800A-6D3E89A9ED17}.Debug|AVR.ActiveCfg = Debug|AVR
-		{3521E852-6003-4F26-800A-6D3E89A9ED17}.Debug|AVR.Build.0 = Debug|AVR
-		{3521E852-6003-4F26-800A-6D3E89A9ED17}.Release|AVR.ActiveCfg = Release|AVR
-		{3521E852-6003-4F26-800A-6D3E89A9ED17}.Release|AVR.Build.0 = Release|AVR
+		{89B521F1-410A-4CB7-95CA-6D44E08597E6}.Debug|AVR.ActiveCfg = Debug|AVR
+		{89B521F1-410A-4CB7-95CA-6D44E08597E6}.Debug|AVR.Build.0 = Debug|AVR
+		{89B521F1-410A-4CB7-95CA-6D44E08597E6}.Release|AVR.ActiveCfg = Release|AVR
+		{89B521F1-410A-4CB7-95CA-6D44E08597E6}.Release|AVR.Build.0 = Release|AVR
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -32,6 +32,20 @@
 #include "Timer.h"
 #include "debug_console.h"
 
+#define _USE_DEBUG_CONSOLE_
+
+float gain_Ap = 40.0;
+float gain_Ai = 2.0;
+float gain_Bp = 40.0;
+float gain_Bi = 2.0;
+float ypr_init[3];
+
+float time_start;
+float time_end;
+unsigned int  response_time;
+
+
+
 int main (void)
 {
 	/* Insert system clock initialization code here (sysclk_init()). */
@@ -48,35 +62,64 @@ int main (void)
 	
 	InitTimer();
 	
-#ifdef	_USE_DEBUG_CONSOLE_
-	#ifdef	_USE_USB_FOR_DEBUG_
+#ifdef	_USE_USB_FOR_DEBUG_
 	udc_start();	// Start USB stack
-	#endif
+#endif
+#ifdef	_USE_DEBUG_CONSOLE_
 	DebugInit();
-#elif defined _MPU6050_H_	
+#endif
+
+#if defined _MPU6050_H_	
 	MPU6050_Setup();
 #endif
 	
 	L298N_init();
 	
 	StartTimer(BLINK_TIMER, 500);
+	StartTimer(BALANCE_TIMER, 5);
+
+	#define SPEED_RATE	4
+	
+	char init_done = 0;
+	float speed_Ai_calc = 0.0;
+	float speed_Bi_calc = 0.0;
+	int speed_A = 0;
+	int speed_A_start = 0;
+	int speed_A_end = MAX_SPEED;
+	int speed_B = 0;
+	int speed_B_start = 0;
+	int speed_B_end = MAX_SPEED;
+
+	int speed_increment = SPEED_RATE;
 	
 	while (true) {
 #ifdef	_USE_DEBUG_CONSOLE_
 		DebugTask();
-#elif defined _MPU6050_H_
-		DoSerial();
-		MPU6050_Loop();
-		DoSerial();
-#endif		
-		if (TimerOut(BLINK_TIMER))
+#endif
+		if(TimerOut(BALANCE_TIMER))
 		{
-			ResetTimer(BLINK_TIMER);
-			StartTimer(BLINK_TIMER, 500);
-			gpio_tgl_gpio_pin(BLINK_LED);
-#ifdef _MPU6050_H_
-			DebugPrint("\r\n %3.2f %3.2f %3.2f", ypr[0], ypr[1], ypr[2]);
-#endif			
+			ResetTimer(BALANCE_TIMER);
+			StartTimer(BALANCE_TIMER,5);
+
+			speed_A += speed_increment;
+
+			if (speed_A>=MAX_SPEED)
+			{
+				speed_A = MAX_SPEED;
+				speed_increment = -SPEED_RATE;
+			}
+			else
+			if (speed_A<=-MAX_SPEED)
+			{
+				speed_A = -MAX_SPEED;
+				speed_increment = SPEED_RATE;
+			}
+			speed_B = speed_A;
+
+			L298_set_speed(speed_A, speed_B);
+			#ifdef	_USE_DEBUG_CONSOLE_
+			DebugPrint("\r\n %8i %8i" , speed_A, speed_B);
+			#endif
 		}
 	}
 }
