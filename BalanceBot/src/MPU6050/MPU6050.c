@@ -31,7 +31,7 @@ typedef struct {
 	float z;
 } VectorFloat;
 
-#define TRACE	print_dbg
+#define TRACE
 
 #define YAW 	0
 #define PITCH	1

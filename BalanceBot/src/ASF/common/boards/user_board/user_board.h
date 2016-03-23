@@ -82,9 +82,10 @@
 #define MPU6050
 
 #include "L298N.h"
-//#include "MPU6050.h"
+#include "MPU6050.h"
 #include "MadgwickAHRS.h"
+#include "debug_console.h"
 
-//#define _USE_DEBUG_CONSOLE_
+#define _USE_DEBUG_CONSOLE_
 
 #endif // USER_BOARD_H

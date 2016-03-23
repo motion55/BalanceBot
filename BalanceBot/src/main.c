@@ -30,9 +30,6 @@
  */
 #include "asf.h"
 #include "Timer.h"
-#include "debug_console.h"
-
-#define _USE_DEBUG_CONSOLE_
 
 float gain_Ap = 40.0;
 float gain_Ai = 2.0;
@@ -69,7 +66,7 @@ int main (void)
 	DebugInit();
 #endif
 
-#if defined _MPU6050_H_	
+#ifdef _MPU6050_H_	
 	MPU6050_Setup();
 #endif
 	
@@ -91,16 +88,39 @@ int main (void)
 	int speed_B_end = MAX_SPEED;
 
 	int speed_increment = SPEED_RATE;
-	
+
+	int loops = 0;
+	uint32_t lasttime = Get_sys_count();
+	uint32_t scantime = 0;
+		
 	while (true) {
 #ifdef	_USE_DEBUG_CONSOLE_
 		DebugTask();
 #endif
+
+#ifdef _MPU6050_H_
+		if (MPU6050_Loop())
+		{
+			uint32_t nowtime = Get_sys_count();
+			scantime += nowtime - lasttime;
+			lasttime = nowtime;
+
+			loops++;
+			if (loops>=16)
+			{
+				scantime /= loops;
+				#ifdef	_USE_DEBUG_CONSOLE_
+				DebugPrint("\r\n scantime = %8li ", scantime);
+				#endif
+				loops = 0;
+				scantime = 0;
+			}
+		}
+#else
 		if(TimerOut(BALANCE_TIMER))
 		{
 			ResetTimer(BALANCE_TIMER);
 			StartTimer(BALANCE_TIMER,5);
-
 			speed_A += speed_increment;
 
 			if (speed_A>=MAX_SPEED)
@@ -121,5 +141,6 @@ int main (void)
 			DebugPrint("\r\n %8i %8i" , speed_A, speed_B);
 			#endif
 		}
+#endif
 	}
 }
