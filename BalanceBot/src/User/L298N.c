@@ -7,20 +7,21 @@
 #include <asf.h>
 #include "L298N.h"
 
+avr32_pwm_channel_t pwm_channel = 
+	{{0},	// cmr
+	{0},	// cdty
+	{0},	// cdtyupd
+	{0},	// cprd
+	{0},	// cprdupd
+	{0},	// ccnt
+	{0},	// dt
+	{0}};	// dtupd  ;  One channel config.
 
 int L298_set_channel_speed(unsigned int channel_id, int channel_speed);
 
 void L298N_init(void)
 {
 	pwm_opt_t pwm_opt;                // PWM option config.
-	avr32_pwm_channel_t pwm_channel = {{0}, // cmr
-										{0}, // cdty
-										{0}, // cdtyupd
-										{0}, // cprd
-										{0}, // cprdupd
-										{0}, // ccnt
-										{0}, // dt
-										{0}};// dtupd  ;  One channel config.
 	
 #ifdef L298N_ENA_FUNC
 	gpio_enable_module_pin(L298N_ENA_PIN, L298N_ENA_FUNC);
@@ -59,7 +60,7 @@ void L298N_init(void)
 	pwm_init(&pwm_opt);
 
 	// Update the period
-	pwm_update_period_value(1);
+	pwm_update_period_value(2);
 
 	// With these settings, the output waveform period will be :
 	// (48MHz)/2400 == 20KHz == (MCK/prescaler)/period, with MCK == 48MHz,
@@ -96,18 +97,15 @@ void L298N_init(void)
 	pwm_channel.DT.dth    = 0;
 	pwm_channel.DT.dtl    = 0;	//PWM_PERIOD;
 
+	pwm_channel_init(0, &pwm_channel);
 	pwm_channel_init(L298N_CHANA, &pwm_channel); // Set channel configuration to channel A
 	pwm_channel_init(L298N_CHANB, &pwm_channel); // Set channel configuration to channel B
-	pwm_start_channels((1 << L298N_CHANA)|(1 << L298N_CHANB));  // Start channels A & B
+	pwm_start_channels((1 << L298N_CHANA)|(1 << L298N_CHANB)|1);  // Start channels A & B
 #endif	
 }
 
 int L298_set_speed(int Chan_A_Speed, int Chan_B_Speed)
 {
-#if (defined(L298N_ENA_FUNC)||defined(L298N_ENB_FUNC))
-	avr32_pwm_channel_t pwm_channel;
-#endif
-
 #ifdef L298N_ENA_FUNC
 	if (Chan_A_Speed==0)
 	{
@@ -128,6 +126,7 @@ int L298_set_speed(int Chan_A_Speed, int Chan_B_Speed)
 	}
 	if (Chan_A_Speed>MAX_SPEED) Chan_A_Speed = MAX_SPEED;
 	pwm_channel.cdtyupd = PWM_PERIOD/2;
+	pwm_channel.DT.dth = Chan_A_Speed+DEAD_ZONE;
 	pwm_channel.DTUPD.dthupd = Chan_A_Speed+DEAD_ZONE;
 #else
 	if (Chan_A_Speed==0)
@@ -157,6 +156,7 @@ int L298_set_speed(int Chan_A_Speed, int Chan_B_Speed)
 	}
 	if (Chan_B_Speed>MAX_SPEED) Chan_B_Speed = MAX_SPEED;
 	pwm_channel.cdtyupd = PWM_PERIOD/2;
+	pwm_channel.DT.dtl = Chan_B_Speed+DEAD_ZONE;
 	pwm_channel.DTUPD.dtlupd = Chan_B_Speed+DEAD_ZONE;
 #else
 	if (Chan_B_Speed==0)

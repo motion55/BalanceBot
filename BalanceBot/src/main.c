@@ -31,12 +31,6 @@
 #include "asf.h"
 #include "Timer.h"
 
-float gain_Ap = 40.0;
-float gain_Ai = 2.0;
-float gain_Bp = 40.0;
-float gain_Bi = 2.0;
-float ypr_init[3];
-
 float time_start;
 float time_end;
 unsigned int  response_time;
@@ -80,18 +74,21 @@ int main (void)
 	char init_done = 0;
 	float speed_Ai_calc = 0.0;
 	float speed_Bi_calc = 0.0;
+
 	int speed_A = 0;
-	int speed_A_start = 0;
-	int speed_A_end = MAX_SPEED;
 	int speed_B = 0;
-	int speed_B_start = 0;
-	int speed_B_end = MAX_SPEED;
 
 	int speed_increment = SPEED_RATE;
 
 	int loops = 0;
 	uint32_t lasttime = Get_sys_count();
 	uint32_t scantime = 0;
+
+	float gain_Ap = 100.0f;
+	float gain_Ai = 15.0f;
+	//float gain_Bp = 40.0;
+	//float gain_Bi = 2.0;
+	float ypr_init[3];
 		
 	while (true) {
 #ifdef	_USE_DEBUG_CONSOLE_
@@ -101,6 +98,43 @@ int main (void)
 #ifdef _MPU6050_H_
 		if (MPU6050_Loop())
 		{
+	#if 1
+			if (init_done == 0)
+			{
+				init_done = 1;
+				ypr_init[0] =  ypr[0];
+				ypr_init[1] =  ypr[1];
+				ypr_init[2] =  ypr[2];
+			}
+			else
+			{
+				float tilt_angle = ypr[1] - ypr_init[1];
+				float speed_Ap_calc = tilt_angle * gain_Ap;
+				speed_Ai_calc += tilt_angle * gain_Ai;
+
+				if (speed_Ai_calc>MAX_SPEED_F) speed_Ai_calc = MAX_SPEED_F;
+				else
+				if (speed_Ai_calc<-MAX_SPEED_F) speed_Ai_calc = -MAX_SPEED_F;
+			
+				speed_A = (int)(speed_Ap_calc + speed_Ai_calc);
+				if (speed_A>MAX_SPEED) speed_A = MAX_SPEED;
+				else
+				if (speed_A<-MAX_SPEED) speed_A = -MAX_SPEED;
+
+				speed_B = speed_A;
+				
+				L298_set_speed(speed_A, speed_B);
+
+				loops++;
+				if (loops>=4)
+				{
+					loops = 0;
+					#ifdef	_USE_DEBUG_CONSOLE_
+					DebugPrint("\r\n %8.3f %8i", ypr[1],speed_A);
+					#endif
+				}
+			}
+	#else
 			uint32_t nowtime = Get_sys_count();
 			scantime += nowtime - lasttime;
 			lasttime = nowtime;
@@ -115,6 +149,7 @@ int main (void)
 				loops = 0;
 				scantime = 0;
 			}
+	#endif
 		}
 #else
 		if(TimerOut(BALANCE_TIMER))

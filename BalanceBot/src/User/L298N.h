@@ -52,10 +52,10 @@
 
 /* PWM_FREQUENCY = 24MHz/PWM_PERIOD = 11,718.75Hz*/
 #define PWM_PERIOD	2048
-#define	DEAD_ZONE	100
+#define	DEAD_ZONE	400
 
 #define MAX_SPEED	(PWM_PERIOD-DEAD_ZONE-1)
-#define MAX_SPEED_F	(float)MAX_SPEED
+#define MAX_SPEED_F	(float)(MAX_SPEED/1.5f)
 
 extern void L298N_init(void);
 
