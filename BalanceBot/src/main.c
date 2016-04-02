@@ -35,9 +35,9 @@ float time_start;
 float time_end;
 unsigned int  response_time;
 
-float gain_Ap = 20.0f;
-float gain_Ai = 150.0f;
-float decay = 1.00;
+float gain_Ap = 18.0f;
+float gain_Ai = 180.0f;
+float decay = 0.99;
 
 int main (void)
 {
@@ -93,7 +93,7 @@ int main (void)
 	float ypr_total[3] = {0.0,0.0,0.0};
 	float ypr_zero_long[3];
 	
-#define AVERAGE_SIZE	128
+#define AVERAGE_SIZE	256
 
 	while (!init_done) 
 	{
@@ -152,7 +152,9 @@ int main (void)
 				ypr_total[1] = 0;
 				ypr_total[2] = 0;
 
-				float tilt_angle = ypr[1] - ypr_zero[1];
+				#define BALANCE_PORT	2
+
+				float tilt_angle = -(ypr[BALANCE_PORT] - ypr_zero[BALANCE_PORT]);
 				speed_I_calc += (tilt_angle-old_angle) * gain_Ai;
 				float speed_P_calc = tilt_angle * gain_Ap;
 
@@ -176,12 +178,12 @@ int main (void)
 				
 				L298_set_speed(speed_A, speed_B);
 
-				ypr_zero_long[1] -= ypr_zero[1];
-				ypr_zero_long[1] += ypr[1];
-				ypr_zero[1] = ypr_zero_long[1]/AVERAGE_SIZE;
+				ypr_zero_long[BALANCE_PORT] -= ypr_zero[BALANCE_PORT];
+				ypr_zero_long[BALANCE_PORT] += ypr[BALANCE_PORT];
+				ypr_zero[BALANCE_PORT] = ypr_zero_long[BALANCE_PORT]/AVERAGE_SIZE;
 
 				#ifdef	_USE_DEBUG_CONSOLE_
-				DebugPrint("\r\n %8.3f %8.3f - %8.3f %8.3f %8.3f", tilt_angle, ypr_zero[1], ypr[0], ypr[1], ypr[2]);
+				//DebugPrint("\r\n %8.3f %8.3f - %8.3f %8.3f %8.3f", tilt_angle, ypr_zero[BALANCE_PORT], ypr[0], ypr[1], ypr[2]);
 				#endif
 			}
 	#else
