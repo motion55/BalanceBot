@@ -35,8 +35,10 @@ float time_start;
 float time_end;
 unsigned int  response_time;
 
-float gain_Ap = 18.0f;
-float gain_Ai = 180.0f;
+float gain_Ap = 150.0f;
+float gain_Ai = 20.0f;
+float gain_Ad = 800.0f;
+
 float decay = 0.99;
 
 int main (void)
@@ -155,21 +157,22 @@ int main (void)
 				#define BALANCE_PORT	2
 
 				float tilt_angle = -(ypr[BALANCE_PORT] - ypr_zero[BALANCE_PORT]);
-				speed_I_calc += (tilt_angle-old_angle) * gain_Ai;
 				float speed_P_calc = tilt_angle * gain_Ap;
+				speed_I_calc += tilt_angle * gain_Ai;
+				float speed_D_calc = (tilt_angle-old_angle) * gain_Ad;
+				old_angle = tilt_angle;
 
 //				if (tilt_angle>=0 && old_angle<0) speed_I_calc = 0;
 //				else
 //				if (tilt_angle<=0 && old_angle>0) speed_I_calc = 0;
-
-				old_angle = tilt_angle*decay;
 //				speed_I_calc *= decay;
 
 				if (speed_I_calc>MAX_SPEED_F) speed_I_calc = MAX_SPEED_F;
 				else
 				if (speed_I_calc<-MAX_SPEED_F) speed_I_calc = -MAX_SPEED_F;
 				
-				speed_A = (int)(speed_P_calc + speed_I_calc);
+				speed_A = (int)(speed_P_calc + speed_I_calc + speed_D_calc);
+
 				if (speed_A>MAX_SPEED) speed_A = MAX_SPEED;
 				else
 				if (speed_A<-MAX_SPEED) speed_A = -MAX_SPEED;
@@ -178,12 +181,13 @@ int main (void)
 				
 				L298_set_speed(speed_A, speed_B);
 
-				ypr_zero_long[BALANCE_PORT] -= ypr_zero[BALANCE_PORT];
-				ypr_zero_long[BALANCE_PORT] += ypr[BALANCE_PORT];
-				ypr_zero[BALANCE_PORT] = ypr_zero_long[BALANCE_PORT]/AVERAGE_SIZE;
+				//ypr_zero_long[BALANCE_PORT] -= ypr_zero[BALANCE_PORT];
+				//ypr_zero_long[BALANCE_PORT] += ypr[BALANCE_PORT];
+				//ypr_zero[BALANCE_PORT] = ypr_zero_long[BALANCE_PORT]/AVERAGE_SIZE;
 
 				#ifdef	_USE_DEBUG_CONSOLE_
 				//DebugPrint("\r\n %8.3f %8.3f - %8.3f %8.3f %8.3f", tilt_angle, ypr_zero[BALANCE_PORT], ypr[0], ypr[1], ypr[2]);
+				DebugPrint("\r\n %8.3f %5i", tilt_angle, speed_A);
 				#endif
 			}
 	#else
