@@ -59,7 +59,7 @@ static unsigned int old_dump_beg = 0;
 static unsigned int dump_end = 0;
 static unsigned char *debug_port = (unsigned char *)0x80000000;
 
-Bool bTest = FALSE;
+Bool bTest = false;
 
 #define	BUFFER_SIZE	1024
 
@@ -80,6 +80,8 @@ void DebugInit(void)
 	DebugPrint("\r\n Welcome to Debug Console ver 1.0!");
 	DebugPrint(" Compile Date: %s, Time: %s \r\n",__DATE__,__TIME__);
 	SendDebugPrompt;
+	ResetTimer(DEBUG_TIMER);
+	StartTimer(DEBUG_TIMER,50);
 }
 
 unsigned int do_dump(void)
@@ -187,21 +189,8 @@ void debug_parse(char *cmd_line)
 	case 'H':  // hex
 		break;
 	case 'I':  // read byte
-		if (sscanf(cmd_line,"%X",&temp1)==1)
-		{
-			debug_port = (unsigned char*)temp1;
-			tempbyte = *(unsigned char*)debug_port;
-			DebugPrint("\r\n %08X -> %02X",(int)debug_port,tempbyte);
-			debug_port += sizeof(tempbyte);
-		}
 		break;
 	case 'J':  // read word
-		if (sscanf(cmd_line,"%X",&temp1)==1)
-		{
-			debug_port = (unsigned char*)(temp1&0xFFFFFFFE);
-		}
-		tempword = *(unsigned short*)debug_port;
-		DebugPrint("\r\n %08X -> %04X",(int)debug_port,tempword);
 		break;
 	case 'K':
 		break;
@@ -237,39 +226,25 @@ void debug_parse(char *cmd_line)
 		}
 		break;
 	case 'P':  // proceed
-		if (sscanf(cmd_line,"%X",&temp1)==1)
+		if (sscanf(cmd_line,"%d",&temp1)==1)
 		{
-			switch (temp1){
-			case 0:
-				break;
-			case 1:
-				break;
-			case 2:
-				break;
-			case 3:
-				break;
-			case 4:
-				break;
-			case 5:
-				break;
-			case 6:
-				break;
-			case 7:
-				break;
-			case 8:
-				break;
-			case 9:
-				break;
-			}
+			gain_Ap = temp1;
 		}
-		else
-		{
-		}
+		DebugPrint("\r\n gain_Ap = %5.1f",gain_Ap);
 		break;
 	case 'Q':  // quit
-		DebugSend("\r\nYou can't quit now!");
+		if (sscanf(cmd_line,"%d",&temp1)==1)
+		{
+			gain_Ai = temp1;
+		}
+		DebugPrint("\r\n gain_Ai = %5.1f",gain_Ai);
 		break;
 	case 'R':  // register
+		if (sscanf(cmd_line,"%d",&temp1)==1)
+		{
+			gain_Ad = temp1;
+		}
+		DebugPrint("\r\n gain_Ad = %5.1f",gain_Ad);
 		break;
 	case 'S':  // search
 		if (sscanf(cmd_line,"%X",&temp2)==1)
@@ -315,6 +290,17 @@ void debug_parse(char *cmd_line)
 		}
 		else
 		{
+			bTest = !bTest;
+			if (bTest)
+			{
+				DebugPrint("\r\n Test ON!");
+				ResetTimer(DEBUG_TIMER);
+				StartTimer(DEBUG_TIMER,50);
+			}
+			else
+			{
+				DebugPrint("\r\n Test OFF!");
+			}
 		}
 		break;
 	case 'U':
@@ -506,9 +492,12 @@ void debug_idle(void)
 {
 	if (bTest)
 	{
-	#ifdef	_MPU6050_H_
-		MPU6050_Loop();
-	#endif
+		if (TimerOut(DEBUG_TIMER))
+		{
+			ResetTimer(DEBUG_TIMER);
+			StartTimer(DEBUG_TIMER,100);
+			Do_Debug_Idle();
+		}
 	}
 }
 

@@ -42,8 +42,9 @@
 
 #define BLINK_TIMER     	1
 #define BLINK_LED   		AVR32_PIN_PD30
-#define BALANCE_TIMER		2
-#define BALANCE_TIMER_2		3
+#define DEBUG_TIMER  		2
+#define BALANCE_TIMER		3
+#define BALANCE_TIMER_2		4
 
 
 #define DBG_USART   			(&AVR32_USART2)
@@ -51,7 +52,7 @@
 #define DBG_USART_RX_FUNCTION   AVR32_USART2_RXD_0_1_FUNCTION
 #define DBG_USART_TX_PIN        AVR32_USART2_TXD_0_1_PIN
 #define DBG_USART_TX_FUNCTION   AVR32_USART2_TXD_0_1_FUNCTION
-#define DBG_USART_BAUDRATE      57600
+#define DBG_USART_BAUDRATE      38400
 
 //#define _USE_USB_FOR_DEBUG_
 
@@ -87,5 +88,11 @@
 #include "debug_console.h"
 
 #define _USE_DEBUG_CONSOLE_
+
+extern void Do_Debug_Idle(void);
+
+extern float gain_Ap;
+extern float gain_Ai;
+extern float gain_Ad;
 
 #endif // USER_BOARD_H

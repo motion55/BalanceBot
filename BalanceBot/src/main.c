@@ -36,10 +36,63 @@ float time_end;
 unsigned int  response_time;
 
 float gain_Ap = 150.0f;
-float gain_Ai = 20.0f;
-float gain_Ad = 800.0f;
+float gain_Ai = 25.0f;
+float gain_Ad = 400.0f;
 
 float decay = 0.99;
+
+float tnngents[46] = {
+	0.0000,0.0175,0.0349,0.0524,0.0699,
+	0.0875,0.1051,0.1228,0.1405,0.1584,
+	0.1763,0.1944,0.2126,0.2309,0.2493,
+	0.2679,0.2867,0.3057,0.3249,0.3443,
+	0.3640,0.3839,0.4040,0.4245,0.4452,
+	0.4663,0.4877,0.5095,0.5317,0.5543,
+	0.5774,0.6009,0.6249,0.6494,0.6745,
+	0.7002,0.7265,0.7536,0.7813,0.8098,
+	0.8391,0.8693,0.9004,0.9325,0.9657,
+	1.0000
+};
+
+float tangent(float angle)
+{
+	char sign = 0;
+	if (angle<0)
+	{
+		angle = -angle;
+		sign = -1;
+	}
+
+	int angle_int = (int)angle;
+	if (angle_int>=45)
+	{
+		if (sign!=0) return -1.0f;
+		else return 1.0f;
+	}
+
+	float tan_base0 = tnngents[angle_int];
+	float tan_base1 = tnngents[angle_int+1];
+	angle -= (float)angle_int;
+	tan_base0 += ((tan_base1-tan_base0)*angle)/angle_int;
+
+	if (sign!=0) return -tan_base0;
+	else return tan_base0;
+}
+
+Bool data_ready = false;
+float tilt_angle;
+int speed_A = 0;
+int speed_B = 0;
+
+void Do_Debug_Idle(void)
+{
+	if (data_ready)
+	{
+		data_ready = false;
+		//DebugPrint("\r\n %8.3f %8.3f - %8.3f %8.3f %8.3f", tilt_angle, ypr_zero[BALANCE_PORT], ypr[0], ypr[1], ypr[2]);
+		DebugPrint("\r\n %8.3f %5i", tilt_angle, speed_A);
+	}
+}
 
 int main (void)
 {
@@ -78,9 +131,6 @@ int main (void)
 	char init_done = 0;
 	float speed_I_calc = 0.0;
 
-	int speed_A = 0;
-	int speed_B = 0;
-
 	int speed_increment = SPEED_RATE;
 
 	int loops = 0;
@@ -93,9 +143,10 @@ int main (void)
 	//float gain_Bi = 2.0;
 	float ypr_zero[3];
 	float ypr_total[3] = {0.0,0.0,0.0};
-	float ypr_zero_long[3];
+	float ypr_zero_long;
 	
-#define AVERAGE_SIZE	256
+#define AVERAGE_SIZE	4096
+#define BALANCE_PORT	2
 
 	while (!init_done) 
 	{
@@ -117,9 +168,9 @@ int main (void)
 				ypr_total[1] = 0;
 				ypr_total[2] = 0;
 
-				ypr_zero_long[1] = ypr_zero[1]*AVERAGE_SIZE;
-				old_angle = ypr_zero[1];
-
+				ypr_zero_long = ypr_zero[BALANCE_PORT]*AVERAGE_SIZE;
+				old_angle = 0;
+				speed_I_calc = 0;
 
 				#ifdef	_USE_DEBUG_CONSOLE_
 				DebugPrint("\r\n     Init %8.3f - %8.3f %8.3f %8.3f", ypr_zero[1], ypr[0], ypr[1], ypr[2]);
@@ -154,41 +205,59 @@ int main (void)
 				ypr_total[1] = 0;
 				ypr_total[2] = 0;
 
-				#define BALANCE_PORT	2
+				tilt_angle = -(ypr[BALANCE_PORT] - ypr_zero[BALANCE_PORT]);
 
-				float tilt_angle = -(ypr[BALANCE_PORT] - ypr_zero[BALANCE_PORT]);
-				float speed_P_calc = tilt_angle * gain_Ap;
-				speed_I_calc += tilt_angle * gain_Ai;
-				float speed_D_calc = (tilt_angle-old_angle) * gain_Ad;
-				old_angle = tilt_angle;
+				if ((tilt_angle<-30.0)||(tilt_angle>+30.0))
+				{
+					speed_B = speed_A = 0;
 
-//				if (tilt_angle>=0 && old_angle<0) speed_I_calc = 0;
-//				else
-//				if (tilt_angle<=0 && old_angle>0) speed_I_calc = 0;
-//				speed_I_calc *= decay;
-
-				if (speed_I_calc>MAX_SPEED_F) speed_I_calc = MAX_SPEED_F;
+					L298_set_speed(speed_B, speed_A);
+				}
 				else
-				if (speed_I_calc<-MAX_SPEED_F) speed_I_calc = -MAX_SPEED_F;
+				{
+					float gain_factor = 1.40f;
+					if (abs(tilt_angle)>=8) gain_factor = 1.0f;
+					else
+					if (abs(tilt_angle)>=4) gain_factor = 1.20f;
+
+					//tilt_angle = tangent(tilt_angle);
+					float speed_P_calc = tilt_angle * gain_Ap * gain_factor;
+					speed_I_calc += tilt_angle * gain_Ai * gain_factor;
+					float speed_D_calc = (tilt_angle-old_angle) * gain_Ad * gain_factor;
+					old_angle = tilt_angle;
+
+					//if (tilt_angle>=0 && old_angle<0) speed_I_calc = 0;
+					//else
+					//if (tilt_angle<=0 && old_angle>0) speed_I_calc = 0;
+					//speed_I_calc *= decay;
+
+					if (speed_I_calc>MAX_SPEED_F) speed_I_calc = MAX_SPEED_F;
+					else
+					if (speed_I_calc<-MAX_SPEED_F) speed_I_calc = -MAX_SPEED_F;
 				
-				speed_A = (int)(speed_P_calc + speed_I_calc + speed_D_calc);
+					int target_speed = (int)(speed_P_calc + speed_I_calc + speed_D_calc);
+					speed_A = target_speed + ((target_speed - speed_A)/2);
 
-				if (speed_A>MAX_SPEED) speed_A = MAX_SPEED;
-				else
-				if (speed_A<-MAX_SPEED) speed_A = -MAX_SPEED;
+					if (speed_A>MAX_SPEED) speed_A = MAX_SPEED;
+					else
+					if (speed_A<-MAX_SPEED) speed_A = -MAX_SPEED;
+					speed_B = speed_A;
 
-				speed_B = speed_A;
-				
-				L298_set_speed(speed_A, speed_B);
+					L298_set_speed(speed_B, speed_A);
 
-				//ypr_zero_long[BALANCE_PORT] -= ypr_zero[BALANCE_PORT];
-				//ypr_zero_long[BALANCE_PORT] += ypr[BALANCE_PORT];
-				//ypr_zero[BALANCE_PORT] = ypr_zero_long[BALANCE_PORT]/AVERAGE_SIZE;
+					speed_A = target_speed;
 
-				#ifdef	_USE_DEBUG_CONSOLE_
-				//DebugPrint("\r\n %8.3f %8.3f - %8.3f %8.3f %8.3f", tilt_angle, ypr_zero[BALANCE_PORT], ypr[0], ypr[1], ypr[2]);
-				DebugPrint("\r\n %8.3f %5i", tilt_angle, speed_A);
-				#endif
+					if (abs(tilt_angle)<3)
+					{
+						ypr_zero_long -= ypr_zero[BALANCE_PORT];
+						ypr_zero_long += ypr[BALANCE_PORT];
+						ypr_zero[BALANCE_PORT] = ypr_zero_long/AVERAGE_SIZE;
+					}
+
+					#ifdef	_USE_DEBUG_CONSOLE_
+					data_ready = true;
+					#endif
+				}
 			}
 	#else
 			ypr_total[0] += ypr[0];
@@ -238,6 +307,8 @@ int main (void)
 				speed_increment = SPEED_RATE;
 			}
 			speed_B = speed_A;
+
+			L298_set_speed(speed_B, speed_A);
 
 			L298_set_speed(speed_A, speed_B);
 			#ifdef	_USE_DEBUG_CONSOLE_
