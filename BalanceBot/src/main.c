@@ -288,7 +288,7 @@ int main (void)
 			}
 	#endif
 		}
-#else
+#else	//#ifndef _MPU6050_H_
 		if(TimerOut(BALANCE_TIMER))
 		{
 			ResetTimer(BALANCE_TIMER);
@@ -315,6 +315,6 @@ int main (void)
 			DebugPrint("\r\n %8i %8i" , speed_A, speed_B);
 			#endif
 		}
-#endif
+#endif	//#ifdef _MPU6050_H_
 	}
 }

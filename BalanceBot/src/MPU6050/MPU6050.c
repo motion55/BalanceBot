@@ -84,7 +84,7 @@ static void MPU6050_DMP_int_handler(void)
 	dmpInterrupt = true;
 }
 
-int MPU6050_Setup(void)
+int MPU6050_Setup_Old(void)
 {
 	twi_master_options_t opt;
 	
@@ -193,7 +193,7 @@ void MPU6050_SetupInterrupt(void)
 	Enable_global_interrupt();
 }
 
-bool MPU6050_Loop(void)
+bool MPU6050_Loop_Old(void)
 {
 	if (!dmpReady) 
 	{
@@ -266,6 +266,75 @@ uint8_t GetYawPitchRoll(float *data, Quaternion *q, VectorFloat *gravity)
 	data[2] = atan(gravity->y * invSqrt(gravity->x*gravity->x + gravity->z*gravity->z));
 	return 0;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int MPU6050_Setup(void)
+{
+	twi_master_options_t opt;
+	
+	opt.speed = MPU6050_TWI_SPEED;
+	opt.chip = MPU6050_ADDRESS;
+	
+	dmpReady = false;
+	
+	int result = twi_master_setup(&MPU6050_TWIM, &opt);
+	if (result!=STATUS_OK)
+	return -1;
+
+	// initialize device
+	TRACE("Initializing MPU...\r\n");
+	result = mpu_init(NULL);
+	if (result != 0)
+	{
+		TRACE("MPU init failed! \r\n");
+		return -1;
+	}
+	
+	TRACE("Setting MPU sensors...\r\n");
+	if (mpu_set_sensors(INV_XYZ_GYRO|INV_XYZ_ACCEL)!=0) {
+		TRACE("Failed to set sensors!\r\n");
+		return -1;
+	}
+	
+	TRACE("Setting GYRO sensitivity...\r\n");
+	if (mpu_set_gyro_fsr(250)!=0) {
+		TRACE("Failed to set gyro sensitivity!\r\n");
+		return -1;
+	}
+	TRACE("Setting ACCEL sensitivity...\r\n");
+	if (mpu_set_accel_fsr(2)!=0) {
+		TRACE("Failed to set accel sensitivity!\r\n");
+		return -1;
+	}
+	// verify connection
+	TRACE("Powering up MPU...\r\n");
+	mpu_get_power_state(&devStatus);
+	TRACE(devStatus ? "MPU6050 connection successful\r\n" : "MPU6050 connection failed %u\r\n");
+	
+	dmpReady = true;
+	
+	return 0;
+}
+
+bool MPU6050_Loop(void)
+{
+	if (!dmpReady)
+	{
+		TRACE("Error: DMP not ready!!\r\n");
+		return false;
+	}
+	
+	timestamp = Get_sys_count();
+
+	if (mpu_get_gyro_reg(int16_t *data))
+		return false;
+	
+	deltatime = Get_sys_count()-timestamp;
+	
+	return true;
+}
+
 
 //---------------------------------------------------------------------------------------------------
 // Fast inverse square-root
