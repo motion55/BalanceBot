@@ -8,8 +8,6 @@
 #ifndef TIMER_H_
 #define TIMER_H_
 
-#include <asf.h>
-
 #define TC_CHANNEL 	0	//use channel 0 of timer/counters 0-2
 #define TIMER_FREQ	1000	//1000Hz
 #define MAX_TIMER	256

@@ -29,7 +29,6 @@
  * Support and FAQ: visit <a href="http://www.atmel.com/design-support/">Atmel Support</a>
  */
 #include "asf.h"
-#include "Timer.h"
 
 float time_start;
 float time_end;
@@ -119,12 +118,13 @@ int main (void)
 
 #ifdef _MPU6050_H_	
 	MPU6050_Setup();
+#else
+	StartTimer(BALANCE_TIMER, 5);
 #endif
 	
 	L298N_init();
 	
 	StartTimer(BLINK_TIMER, 500);
-	StartTimer(BALANCE_TIMER, 5);
 
 	#define SPEED_RATE	4
 	

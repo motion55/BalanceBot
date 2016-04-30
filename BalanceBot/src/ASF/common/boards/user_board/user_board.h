@@ -86,6 +86,7 @@
 #include "MPU6050.h"
 #include "MadgwickAHRS.h"
 #include "debug_console.h"
+#include "Timer.h"
 
 #define _USE_DEBUG_CONSOLE_
 
