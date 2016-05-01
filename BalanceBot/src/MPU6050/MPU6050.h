@@ -379,15 +379,37 @@
 
 /*/////////////////////////////////////////////////////////////////////////////////////////////////*/
 
-typedef enum {MPU6050_OK=0, MPU6050_NOT_DETECTED=100} MPU6050_STATUS_CODE;
+typedef struct {
+	float w;
+	float x;
+	float y;
+	float z;
+} Quaternion;
 
-extern float ypr[3];
-extern float gyro[3];
-extern float accel[3];
-extern float compass[3];
+typedef struct {
+	int16_t x;
+	int16_t y;
+	int16_t z;
+} VectorInt16;
+
+typedef struct {
+	float x;
+	float y;
+	float z;
+} VectorFloat;
+
+extern VectorFloat gyro;
+extern VectorFloat accel;
+
+extern VectorFloat angle;
+
+/*/////////////////////////////////////////////////////////////////////////////////////////////////*/
+
+typedef enum {MPU6050_OK=0, MPU6050_NOT_DETECTED=100} MPU6050_STATUS_CODE;
 
 extern uint32_t timestamp;
 extern uint32_t deltatime;
+
 
 int MPU6050_Setup(void);
 

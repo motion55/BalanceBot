@@ -146,15 +146,16 @@ int main (void)
 	float ypr_zero_long;
 	
 #define AVERAGE_SIZE	4096
-#define BALANCE_PORT	2
+#define BALANCE_PORT	0
+#define BALANCE_ANGLE	angle.x
 
 	while (!init_done) 
 	{
 		if (MPU6050_Loop())
 		{
-			ypr_total[0] +=  ypr[0];
-			ypr_total[1] +=  ypr[1];
-			ypr_total[2] +=  ypr[2];
+			ypr_total[0] +=  angle.x;
+			ypr_total[1] +=  angle.y;
+			ypr_total[2] +=  angle.z;
 
 			loops++;
 			if (loops>=256)
@@ -173,7 +174,7 @@ int main (void)
 				speed_I_calc = 0;
 
 				#ifdef	_USE_DEBUG_CONSOLE_
-				DebugPrint("\r\n     Init %8.3f - %8.3f %8.3f %8.3f", ypr_zero[1], ypr[0], ypr[1], ypr[2]);
+				DebugPrint("\r\n     Init %8.3f - %8.3f %8.3f %8.3f", ypr_zero[0], angle.x, angle.y, angle.z);
 				#endif
 			}
 		}
@@ -188,24 +189,24 @@ int main (void)
 		if (MPU6050_Loop())
 		{
 	#if 1
-			ypr_total[0] += ypr[0];
-			ypr_total[1] += ypr[1];
-			ypr_total[2] += ypr[2];
+			ypr_total[0] += angle.x;
+			ypr_total[1] += angle.y;
+			ypr_total[2] += angle.z;
 
 			loops++;
 			if (loops>=4)
 			{
 				loops = 0;
 
-				ypr[0] = ypr_total[0]/4;
-				ypr[1] = ypr_total[1]/4;
-				ypr[2] = ypr_total[2]/4;
+				angle.x = ypr_total[0]/4;
+				angle.y = ypr_total[1]/4;
+				angle.z = ypr_total[2]/4;
 
 				ypr_total[0] = 0;
 				ypr_total[1] = 0;
 				ypr_total[2] = 0;
 
-				tilt_angle = -(ypr[BALANCE_PORT] - ypr_zero[BALANCE_PORT]);
+				tilt_angle = -(BALANCE_ANGLE - ypr_zero[BALANCE_PORT]);
 
 				if ((tilt_angle<-30.0)||(tilt_angle>+30.0))
 				{
@@ -250,7 +251,7 @@ int main (void)
 					if (abs(tilt_angle)<3)
 					{
 						ypr_zero_long -= ypr_zero[BALANCE_PORT];
-						ypr_zero_long += ypr[BALANCE_PORT];
+						ypr_zero_long += BALANCE_ANGLE;
 						ypr_zero[BALANCE_PORT] = ypr_zero_long/AVERAGE_SIZE;
 					}
 
@@ -260,16 +261,16 @@ int main (void)
 				}
 			}
 	#else
-			ypr_total[0] += ypr[0];
-			ypr_total[1] += ypr[1];
-			ypr_total[2] += ypr[2];
+			ypr_total[0] += angle.x;
+			ypr_total[1] += angle.y;
+			ypr_total[2] += angle.z;
 
 			loops++;
 			if (loops>=8)
 			{
-				ypr[0] = ypr_total[0]/8;
-				ypr[1] = ypr_total[1]/8;
-				ypr[2] = ypr_total[2]/8;
+				angle.x = ypr_total[0]/8;
+				angle.y = ypr_total[1]/8;
+				angle.z = ypr_total[2]/8;
 
 				ypr_total[0] = 0;
 				ypr_total[1] = 0;
@@ -283,7 +284,7 @@ int main (void)
 				loops = 0;
 
 				#ifdef	_USE_DEBUG_CONSOLE_
-				DebugPrint("\r\n scantime = %8li - %8.3f %8.3f %8.3f", scantime, ypr[0], ypr[1], ypr[2]);
+				DebugPrint("\r\n scantime = %8li - %8.3f %8.3f %8.3f", scantime, angle.x, angle.y, angle.z);
 				#endif
 			}
 	#endif
