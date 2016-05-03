@@ -63,7 +63,7 @@
 #else
 #define debug_char_rdy()	usart_test_hit(DBG_USART)
 #define get_debug_char()	usart_getchar(DBG_USART)
-#define put_debug_char(ch)	usart_serial_putchar(DBG_USART,ch)
+#define put_debug_char(ch)	(usart_write_char(DBG_USART,ch)==USART_SUCCESS)
 #endif	//_USE_USB_FOR_DEBUG_
 
 #define	MPU6050_TWIM             	AVR32_TWIM0
@@ -82,6 +82,10 @@
 //#define MPU9150
 #define MPU6050
 
+#include <stdio.h>
+#include <stdarg.h>
+#include <ctype.h>
+#include "string.h"
 #include "L298N.h"
 #include "MPU6050.h"
 #include "MadgwickAHRS.h"
@@ -91,6 +95,9 @@
 #define _USE_DEBUG_CONSOLE_
 
 extern void Do_Debug_Idle(void);
+
+extern void debug_main_Z(char *cmd_line);
+
 
 extern float gain_Ap;
 extern float gain_Ai;

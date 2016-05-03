@@ -34,9 +34,9 @@ float time_start;
 float time_end;
 unsigned int  response_time;
 
-float gain_Ap = 150.0f;
-float gain_Ai = 25.0f;
-float gain_Ad = 400.0f;
+float gain_Ap = 120.0f;
+float gain_Ai = 15.0f;
+float gain_Ad = 500.0f;
 
 float decay = 0.99;
 
@@ -79,17 +79,22 @@ float tangent(float angle)
 }
 
 Bool data_ready = false;
+float ypr_zero[3];
 float tilt_angle;
 int speed_A = 0;
 int speed_B = 0;
+
+#define AVERAGE_SIZE	1024
+#define BALANCE_PORT	0
+#define BALANCE_ANGLE	angle.x
+#define BALANCE_ZERO	ypr_zero[BALANCE_PORT]
 
 void Do_Debug_Idle(void)
 {
 	if (data_ready)
 	{
 		data_ready = false;
-		//DebugPrint("\r\n %8.3f %8.3f - %8.3f %8.3f %8.3f", tilt_angle, ypr_zero[BALANCE_PORT], ypr[0], ypr[1], ypr[2]);
-		DebugPrint("\r\n %8.3f %5i", tilt_angle, speed_A);
+		DebugPrint("\r\n %8.3f %8.3f %5i", tilt_angle, BALANCE_ZERO, speed_A);
 	}
 }
 
@@ -141,14 +146,9 @@ int main (void)
 
 	//float gain_Bp = 40.0;
 	//float gain_Bi = 2.0;
-	float ypr_zero[3];
 	float ypr_total[3] = {0.0,0.0,0.0};
 	float ypr_zero_long;
 	
-#define AVERAGE_SIZE	4096
-#define BALANCE_PORT	0
-#define BALANCE_ANGLE	angle.x
-
 	while (!init_done) 
 	{
 		if (MPU6050_Loop())
@@ -169,12 +169,12 @@ int main (void)
 				ypr_total[1] = 0;
 				ypr_total[2] = 0;
 
-				ypr_zero_long = ypr_zero[BALANCE_PORT]*AVERAGE_SIZE;
+				ypr_zero_long = BALANCE_ZERO*AVERAGE_SIZE;
 				old_angle = 0;
 				speed_I_calc = 0;
 
 				#ifdef	_USE_DEBUG_CONSOLE_
-				DebugPrint("\r\n     Init %8.3f - %8.3f %8.3f %8.3f", ypr_zero[0], angle.x, angle.y, angle.z);
+				DebugPrint("\r\n     Init %8.3f - %8.3f %8.3f %8.3f", BALANCE_ZERO, angle.x, angle.y, angle.z);
 				#endif
 			}
 		}
@@ -206,7 +206,7 @@ int main (void)
 				ypr_total[1] = 0;
 				ypr_total[2] = 0;
 
-				tilt_angle = -(BALANCE_ANGLE - ypr_zero[BALANCE_PORT]);
+				tilt_angle = -(BALANCE_ANGLE - BALANCE_ZERO);
 
 				if ((tilt_angle<-30.0)||(tilt_angle>+30.0))
 				{
@@ -216,10 +216,10 @@ int main (void)
 				}
 				else
 				{
-					float gain_factor = 1.40f;
+					float gain_factor = 1.60f;
 					if (abs(tilt_angle)>=8) gain_factor = 1.0f;
 					else
-					if (abs(tilt_angle)>=4) gain_factor = 1.20f;
+					if (abs(tilt_angle)>=4) gain_factor = 1.30f;
 
 					//tilt_angle = tangent(tilt_angle);
 					float speed_P_calc = tilt_angle * gain_Ap * gain_factor;
@@ -248,11 +248,11 @@ int main (void)
 
 					speed_A = target_speed;
 
-					if (abs(tilt_angle)<3)
+					if (abs(tilt_angle)<5)
 					{
-						ypr_zero_long -= ypr_zero[BALANCE_PORT];
+						ypr_zero_long -= BALANCE_ZERO;
 						ypr_zero_long += BALANCE_ANGLE;
-						ypr_zero[BALANCE_PORT] = ypr_zero_long/AVERAGE_SIZE;
+						BALANCE_ZERO = ypr_zero_long/AVERAGE_SIZE;
 					}
 
 					#ifdef	_USE_DEBUG_CONSOLE_
@@ -268,9 +268,9 @@ int main (void)
 			loops++;
 			if (loops>=8)
 			{
-				angle.x = ypr_total[0]/8;
-				angle.y = ypr_total[1]/8;
-				angle.z = ypr_total[2]/8;
+				angle.x = ypr_total[0]/loops;
+				angle.y = ypr_total[1]/loops;
+				angle.z = ypr_total[2]/loops;
 
 				ypr_total[0] = 0;
 				ypr_total[1] = 0;
@@ -284,7 +284,7 @@ int main (void)
 				loops = 0;
 
 				#ifdef	_USE_DEBUG_CONSOLE_
-				DebugPrint("\r\n scantime = %8li - %8.3f %8.3f %8.3f", scantime, angle.x, angle.y, angle.z);
+				DebugPrint("\r\n %8li - %8.3f %8.3f %8.3f", scantime, angle.x, angle.y, angle.z);
 				#endif
 			}
 	#endif
@@ -317,5 +317,65 @@ int main (void)
 			#endif
 		}
 #endif	//#ifdef _MPU6050_H_
+	}
+}
+
+void debug_main_Z(char *cmd_line)
+{
+	unsigned int temp1,temp2;
+
+	if (sscanf(cmd_line,"%i %i",&temp1,&temp2)==2)
+	{
+		switch (temp1){
+		case 0:
+			break;
+		case 1:
+			break;
+		case 2:
+			break;
+		case 3:
+			break;
+		case 4:
+			break;
+		case 5:
+			break;
+		case 6:
+			break;
+		case 7:
+			break;
+		case 8:
+			break;
+		case 9:
+			break;
+		}
+	}
+	else
+	if (sscanf(cmd_line,"%X",&temp1)==1)
+	{
+		switch (temp1){
+		case 0:
+			break;
+		case 1:
+			break;
+		case 2:
+			break;
+		case 3:
+			break;
+		case 4:
+			break;
+		case 5:
+			break;
+		case 6:
+			break;
+		case 7:
+			break;
+		case 8:
+			break;
+		case 9:
+			break;
+		}
+	}
+	else
+	{
 	}
 }

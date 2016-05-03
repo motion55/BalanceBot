@@ -413,6 +413,6 @@ extern uint32_t deltatime;
 
 int MPU6050_Setup(void);
 
-bool MPU6050_Loop(void);
+Bool MPU6050_Loop(void);
 	
 #endif /* _MPU6050_H_ */

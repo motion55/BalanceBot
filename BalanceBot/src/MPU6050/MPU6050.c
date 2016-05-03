@@ -91,10 +91,11 @@ int MPU6050_Setup(void)
 	mpu_get_power_state(&devStatus);
 	TRACE(devStatus ? "MPU6050 connection successful\r\n" : "MPU6050 connection failed %u\r\n");
 	
-	StartTimer(BALANCE_TIMER, 5);
-
 	CPU_MHz = sysclk_get_cpu_hz();
 	timestamp = Get_sys_count();
+
+	ResetTimer(BALANCE_TIMER);
+	StartTimer(BALANCE_TIMER, 5);
 
 	return 0;
 }
@@ -107,13 +108,13 @@ float GetFilteredAngle(float angle, float gyro, float delta, float accel)
 }
 
 
-bool MPU6050_Loop(void)
+Bool MPU6050_Loop(void)
 {
-	if (mpu_get_gyro_reg(gyro_raw))	return false;
+	if (!TimerOut(BALANCE_TIMER)) return false;
+	ResetTimer(BALANCE_TIMER);
+	StartTimer(BALANCE_TIMER,5);
 
-	uint32_t delta = timestamp;
-	timestamp  = Get_sys_count();
-	float dt = ((float)(timestamp - delta))/CPU_MHz;
+	if (mpu_get_gyro_reg(gyro_raw))	return false;
 
 	gyro.x = gyro_raw[0] / 131.072f;
 	gyro.y = gyro_raw[1] / 131.072f;
@@ -124,6 +125,10 @@ bool MPU6050_Loop(void)
 	accel.x = accel_raw[0] / 182.044f;
 	accel.y = accel_raw[1] / 182.044f;
 	accel.z = accel_raw[2] / 182.044f;
+
+	uint32_t delta = timestamp;
+	timestamp  = Get_sys_count();
+	float dt = ((float)(timestamp - delta))/CPU_MHz;
 
 	angle.x = GetFilteredAngle(angle.x,gyro.x,dt,accel.y);
 	angle.y = GetFilteredAngle(angle.y,gyro.y,dt,accel.x);

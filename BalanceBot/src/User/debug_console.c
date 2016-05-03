@@ -15,11 +15,6 @@
 /*----------------------------------------------------------*/
 
 #include <asf.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <ctype.h>
-#include "string.h"
-#include "debug_console.h"
 #include "Timer.h"
 
 #ifndef EOF
@@ -61,9 +56,9 @@ static unsigned char *debug_port = (unsigned char *)0x80000000;
 
 Bool bTest = false;
 
-#define	BUFFER_SIZE	1024
+#define	DBG_BUFFER_SIZE	1024
 
-char tx_buffer[BUFFER_SIZE];
+char tx_buffer[DBG_BUFFER_SIZE];
 unsigned short tx_head=0, tx_tail=0;
 
 void debug_idle(void);
@@ -415,38 +410,7 @@ void debug_parse(char *cmd_line)
 		}
 		break;
 	case 'Z':
-		if (sscanf(cmd_line,"%i %i",&temp1,&temp2)==2)
-		{
-		}
-		else
-		if (sscanf(cmd_line,"%X",&temp1)==1)
-		{
-			switch (temp1){
-			case 0:
-				break;
-			case 1:
-				break;
-			case 2:
-				break;
-			case 3:
-				break;
-			case 4:
-				break;
-			case 5:
-				break;
-			case 6:
-				break;
-			case 7:
-				break;
-			case 8:
-				break;
-			case 9:
-				break;
-			}
-		}
-		else
-		{
-		}
+		debug_main_Z(cmd_line);
 		break;
 	default:
 		;
@@ -514,9 +478,9 @@ void DebugTask(void)
 void DebugPutChar(char ch)
 {
 	tx_buffer[tx_head] = ch;
-	tx_head = (tx_head+1)&(BUFFER_SIZE-1);
+	tx_head = (tx_head+1)&(DBG_BUFFER_SIZE-1);
 	if (tx_head==tx_tail)
-		tx_tail = (tx_tail+1)&(BUFFER_SIZE-1);	//discard oldest
+		tx_tail = (tx_tail+1)&(DBG_BUFFER_SIZE-1);	//discard oldest
 }
 
 void DebugSend(char *message)
@@ -546,7 +510,7 @@ inline void DoSerial(void)
 	if (tx_tail!=tx_head)
 	{
 		if (put_debug_char(tx_buffer[tx_tail]))
-		tx_tail = (tx_tail+1)&(BUFFER_SIZE-1);
+			tx_tail = (tx_tail+1)&(DBG_BUFFER_SIZE-1);
 	}
 }
 
